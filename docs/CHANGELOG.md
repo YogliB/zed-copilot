@@ -7,14 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned
+### Phase 2.2 (In Progress)
+- Configuration system for Zed settings
+- Credential management and validation
+- Environment variable interpolation
+- Per-provider configuration support
+- Configuration error handling
+
+### Phase 2.3 (Planned - Q1 2025)
+- HTTP client integration with reqwest
+- Streaming response support (SSE)
+- Retry logic with exponential backoff
+- Rate limiting enforcement
+- Network error recovery
+
+### Phase 3 (Planned - Q2 2025)
+- Chat interface (primary feature)
+- Multi-turn conversation support
+- Message history storage and retrieval
+- Streaming response display
+- Code context integration
+
+### Phase 4+ (Optional)
 - Code completion engine
-- Context extraction system
-- Configuration management (Phase 2.2)
-- API key handling (Phase 2.3)
-- Retry logic and rate limiting
-- Request caching strategy
+- Advanced features (refactoring, test generation, etc.)
+- Custom system prompts
 - Performance optimizations
+
+For detailed timeline, see [ROADMAP.md](../docs/ROADMAP.md).
 
 ## [0.1.0-alpha] - 2024-11-20
 

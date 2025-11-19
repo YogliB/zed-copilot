@@ -261,45 +261,82 @@ cargo fmt && cargo clippy && cargo test
 
 ## Current Test Coverage
 
-**Unit Tests (5)**
-- `test_zed_copilot_new` — Verify basic instantiation
-- `test_zed_copilot_default` — Verify Default trait implementation
-- `test_extension_trait_new` — Verify Extension trait implementation
-- `test_multiple_instances` — Verify multiple instances can coexist
-- `test_extension_initialization_does_not_panic` — Verify no panic on init
+**Phase 2.1: Provider Tests (31)** ✅
+- Provider instantiation and trait implementation
+- OpenAI and Anthropic provider implementations
+- Provider factory pattern
+- Error handling with ProviderError enum
+- All tests passing ✅
 
-**Integration Tests (9)**
-- `test_extension_compiles_and_loads` — Verify compilation
-- `test_extension_can_be_created_via_default` — Verify default creation
-- `test_extension_does_not_panic_on_creation` — Verify error handling
-- `test_test_context_can_be_created` — Verify test utilities
-- `test_multiple_contexts_can_coexist` — Verify context independence
-- `test_test_context_default_implementation` — Verify context defaults
-- `test_extension_name_is_consistent` — Verify consistency
-- Plus 2 additional tests from common module
+**Phase 1: Extension Tests (9)** ✅
+- Extension struct creation and initialization
+- Trait implementation verification
+- Integration with Zed extension API
 
-**Total: 14 tests**
+**Total: 40+ tests, 100% pass rate** ✅
 
-## Future Test Expansion
+## Test Expansion by Phase
 
-As features are added, new tests should cover:
+### Phase 2.2: Configuration & Credentials (Current)
 
-- **Phase 2 (v0.1.0)**: AI Provider Integration
-  - `test_openai_provider_initialization`
-  - `test_anthropic_provider_initialization`
-  - `test_api_key_configuration`
-  - `test_provider_error_handling`
+**Tests to Add:**
+- `test_config_loading_from_zed_settings` — Load settings.json correctly
+- `test_config_validation_required_fields` — Fail on missing required fields
+- `test_environment_variable_interpolation` — Replace `${VAR_NAME}` in config
+- `test_api_key_validation` — Validate API key format
+- `test_provider_selection_from_config` — Load correct provider from settings
+- `test_invalid_config_error_messages` — Helpful error messages
 
-- **Phase 3 (v0.2.0)**: Code Completion
-  - `test_completion_trigger_logic`
-  - `test_context_extraction`
-  - `test_response_formatting`
-  - `test_caching_strategy`
+**Target:** 50+ total tests, 90%+ coverage
+**Note:** Configuration tests use mocked Zed settings API
 
-- **Phase 4+**: Advanced Features
-  - `test_multi_language_support`
-  - `test_custom_prompts`
-  - `test_refactoring_suggestions`
+### Phase 2.3: HTTP Integration & Streaming
+
+**Tests to Add:**
+- `test_http_request_formatting_openai` — Build correct OpenAI API request
+- `test_http_request_formatting_anthropic` — Build correct Anthropic API request
+- `test_streaming_response_parsing` — Parse SSE streaming responses
+- `test_streaming_token_buffering` — Buffer and emit tokens correctly
+- `test_retry_logic_exponential_backoff` — Retry with correct delays
+- `test_retry_max_attempts` — Stop after max retries
+- `test_network_error_handling` — Handle connection failures gracefully
+- `test_timeout_handling` — Respect configured timeouts
+- `test_rate_limit_handling` — Respect rate limit headers
+
+**Target:** 65+ total tests, 90%+ coverage
+**Note:** HTTP tests use mocked reqwest client
+
+### Phase 3: Chat Interface (Primary Feature)
+
+**Tests to Add:**
+- `test_message_struct_creation` — Create Message with role and content
+- `test_message_history_fifo_order` — Messages stored in correct order
+- `test_history_truncation_on_limit` — Truncate old messages when limit exceeded
+- `test_chat_engine_single_turn` — Handle one-turn conversation
+- `test_chat_engine_multi_turn` — Handle multi-turn conversation with context
+- `test_streaming_response_to_ui` — Stream responses update UI in real-time
+- `test_context_extraction_file` — Extract current file content
+- `test_context_extraction_selection` — Extract selected text
+- `test_context_injection_into_prompt` — Include context in system prompt
+- `test_chat_error_handling_recoverable` — Retry on transient errors
+- `test_chat_error_handling_permanent` — Display error message on permanent failure
+- `test_chat_state_persistence` — Save and restore conversation history
+- `test_chat_ui_message_display` — Display messages in panel with formatting
+- `test_chat_ui_user_input` — Handle user typing and submission
+- `test_chat_ui_streaming_display` — Update display as tokens arrive
+
+**Target:** 100+ total tests, 85%+ coverage
+**Note:** Chat tests will require Zed UI API mocking
+
+### Phase 4+: Advanced Features (Optional)
+
+**Potential Tests:**
+- Code completion trigger and display
+- Custom system prompts
+- Refactoring suggestions
+- Test generation
+- Documentation generation
+- Multi-language support
 
 ## Debugging Tests
 

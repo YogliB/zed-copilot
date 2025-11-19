@@ -358,15 +358,85 @@ Providers emit structured logs:
 - `[{provider_name}] Completion success: {response_length} chars`
 - `[{provider_name}] Error: {error_message}`
 
+## Streaming Support (Phase 2.3 - Planned)
+
+In Phase 2.3, providers will support streaming responses for real-time chat UX.
+
+**Planned Changes:**
+- Add `stream_complete()` method to `AiProvider` trait
+- Return streaming response as `dyn Stream<Item = String>`
+- Providers handle streaming protocol (SSE, chunked HTTP)
+- Chat engine receives tokens in real-time for UI display
+
+**Example (Not Yet Implemented):**
+```rust
+#[async_trait]
+pub trait AiProvider: Send + Sync {
+    // Existing method
+    async fn complete(&self, prompt: &str) -> ProviderResult<String>;
+    
+    // New streaming method (Phase 2.3)
+    async fn stream_complete(
+        &self, 
+        prompt: &str
+    ) -> ProviderResult<Box<dyn Stream<Item = String>>>;
+}
+```
+
+See [DEVELOPMENT.md](DEVELOPMENT.md#phase-23-http-integration--streaming-next) for Phase 2.3 details.
+
+## Chat Implementation (Phase 3 - Planned)
+
+In Phase 3, providers will support chat conversations with message history.
+
+**Planned Changes:**
+- Modify `complete()` to accept message history
+- Support system prompts and message roles
+- Handle multi-turn conversation context
+- Format messages according to provider API
+
+**Example (Not Yet Implemented):**
+```rust
+pub struct Message {
+    pub role: MessageRole,  // "user" or "assistant"
+    pub content: String,
+}
+
+pub enum MessageRole {
+    User,
+    Assistant,
+    System,
+}
+
+#[async_trait]
+pub trait AiProvider: Send + Sync {
+    // Phase 3: Chat with history
+    async fn complete_with_history(
+        &self,
+        messages: Vec<Message>,
+    ) -> ProviderResult<String>;
+}
+```
+
+See [ROADMAP.md](ROADMAP.md#phase-3-chat-interface--core-functionality) for Phase 3 details.
+
+## Provider Evolution Timeline
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 2.1 | Basic completion interface | ✅ Complete |
+| 2.3 | Streaming responses | ⏳ Planned |
+| 3 | Chat with message history | ⏳ Planned |
+| 4+ | Advanced features | ⏳ Optional |
+
 ## Future Enhancements
 
 - **Local providers** — Ollama, local LLM via HTTP
 - **Provider fallback** — Automatic provider switching on failure
 - **Request caching** — Cache identical prompts to reduce API calls
-- **Retry logic** — Exponential backoff for transient failures
 - **Rate limiting** — Per-provider rate limit enforcement
 - **Custom models** — Support for fine-tuned models
-- **Streaming** — Streaming responses for long completions
+- **Multi-modal** — Image and file input support
 
 ## Related Documentation
 
