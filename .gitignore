@@ -1,0 +1,38 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+*.rlib
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Zed
+.zed/
+zed.log
+
+# Build artifacts
+*.wasm
+*.o
+*.a
+*.so
+*.dylib
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if needed for tooling)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local

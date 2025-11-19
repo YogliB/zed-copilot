@@ -1,0 +1,19 @@
+[package]
+name = "zed-copilot"
+version = "0.0.1"
+edition = "2021"
+description = "AI-powered code completion and assistance for Zed IDE"
+authors = ["Zed Copilot Contributors <copilot@zed.dev>"]
+repository = "https://github.com/zed-industries/zed-copilot"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.1"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
