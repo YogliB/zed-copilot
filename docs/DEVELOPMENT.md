@@ -33,12 +33,15 @@ Zed Copilot is built as a WebAssembly-based extension for Zed IDE using Rust. Th
 Currently, the extension provides:
 - **Extension Registration**: Basic ZedCopilot struct implementing the Extension trait
 - **Initialization**: Logging on startup to verify proper loading
-- **Foundation**: Ready for feature expansion
+- **Test Framework**: Unit and integration tests with 14 passing tests
+- **Foundation**: Ready for AI provider integration in Phase 2
 
 ### Extension Trait Implementation
 
 The `ZedCopilot` struct implements Zed's `Extension` trait with:
 - `new()`: Initializes the extension with logging
+- `Default`: Provides default instantiation path
+- Full test coverage with unit and integration tests
 
 ## Project Structure
 
@@ -47,7 +50,7 @@ zed-copilot/
 ├── extension.toml          # Zed extension metadata
 ├── Cargo.toml              # Rust dependencies and build config
 ├── src/
-│   ├── lib.rs              # Main extension implementation
+│   ├── lib.rs              # Main extension implementation (with unit tests)
 │   ├── provider/            # (Planned) AI provider abstraction
 │   │   ├── mod.rs
 │   │   ├── openai.rs
@@ -58,9 +61,14 @@ zed-copilot/
 │   │   └── mod.rs
 │   └── telemetry/           # (Planned) Logging and metrics
 │       └── mod.rs
-├── tests/                   # Unit and integration tests
+├── tests/
+│   ├── common/
+│   │   └── mod.rs          # Shared test utilities (with tests)
+│   └── integration_tests.rs # Integration tests
+├── docs/
+│   ├── DEVELOPMENT.md       # This file
+│   └── TESTING.md           # Comprehensive testing guide
 ├── README.md                # User guide
-├── DEVELOPMENT.md           # This file
 ├── CHANGELOG.md             # Version history
 ├── LICENSE                  # MIT License
 └── .gitignore               # Git ignore rules
@@ -82,7 +90,7 @@ zed-copilot/
 2. Run `cargo build --release` to compile
 3. Reload extension in Zed (may require restart)
 4. Check `zed: open log` for any errors
-5. Write tests in `tests/` directory
+5. Write tests in `tests/` directory (see TESTING.md for guidelines)
 
 ### Code Standards
 
@@ -91,6 +99,7 @@ zed-copilot/
 - Use meaningful error messages
 - Keep functions focused and testable
 - Log important events for debugging
+- Write tests for new functionality (see TESTING.md)
 
 ### Running Checks
 
@@ -101,12 +110,73 @@ cargo fmt
 # Check for warnings and issues
 cargo clippy
 
-# Run tests
+# Run all tests
 cargo test
+
+# Run tests with output
+cargo test -- --nocapture
+
+# Run unit tests only
+cargo test --lib
+
+# Run integration tests only
+cargo test --test '*'
 
 # Check documentation
 cargo doc --no-deps --open
+
+# Full quality check
+cargo fmt && cargo clippy && cargo test
 ```
+
+## Testing
+
+Zed Copilot includes a comprehensive test framework with 14 passing tests (5 unit + 9 integration).
+
+### Quick Start
+
+```bash
+# Run all tests
+cargo test
+
+# Run tests with output (including println!)
+cargo test -- --nocapture
+
+# Run specific test
+cargo test test_zed_copilot_new
+```
+
+### Test Structure
+
+- **Unit Tests**: Located in `src/lib.rs`, test individual components
+- **Integration Tests**: Located in `tests/integration_tests.rs`, test component interactions
+- **Test Utilities**: Shared helpers in `tests/common/mod.rs`
+
+### Current Test Coverage
+
+- **Unit Tests (5)**: ZedCopilot instantiation, Default trait, Extension trait, panic handling
+- **Integration Tests (9)**: Extension initialization, context creation, stability tests
+
+### Adding New Tests
+
+When adding features, write tests following these patterns:
+
+```rust
+// Unit test (in src/lib.rs or a module)
+#[test]
+fn test_my_feature() {
+    // Arrange
+    let component = MyComponent::new();
+    
+    // Act
+    let result = component.do_something();
+    
+    // Assert
+    assert_eq!(result, expected_value);
+}
+```
+
+See `docs/TESTING.md` for comprehensive testing guide with examples and best practices.
 
 ## Planned Features (Roadmap)
 
@@ -114,7 +184,7 @@ cargo doc --no-deps --open
 - [x] Basic extension scaffolding
 - [x] Zed extension registration
 - [x] Project documentation
-- [ ] Unit test framework
+- [x] Unit test framework (14 tests, all passing)
 - [ ] CI/CD setup (GitHub Actions)
 
 ### Phase 2: AI Provider Integration (v0.1.0)
@@ -190,25 +260,6 @@ Users will configure providers in Zed settings:
 }
 ```
 
-## Testing Strategy
-
-### Unit Tests
-- Test AI provider abstraction
-- Test context extraction
-- Test prompt formatting
-- Test error handling
-
-### Integration Tests
-- Test Zed API interactions
-- Test extension lifecycle
-- Test file operations
-
-### Manual Testing
-- Test in dev extension mode
-- Verify no performance degradation
-- Test with various file types
-- Test error recovery
-
 ## Performance Considerations
 
 - **WASM Size**: Keep compiled binary under 1MB
@@ -240,10 +291,9 @@ Users will configure providers in Zed settings:
 ## Known Issues & Limitations
 
 ### v0.0.1
-- No AI integration yet (placeholder only)
-- No configuration options
-- Limited error handling
-- No telemetry/metrics
+- No AI integration yet (planned for Phase 2)
+- No configuration options (planned for Phase 2)
+- WASM limitations on std library features (documented in TESTING.md)
 
 ## Contributing Guidelines
 
@@ -251,12 +301,14 @@ Users will configure providers in Zed settings:
 1. Check existing issues to avoid duplication
 2. Discuss major changes in an issue first
 3. Follow the code standards listed above
+4. Add tests for new functionality (see TESTING.md)
 
 ### Submission Checklist
 - [ ] Code follows Rust conventions
 - [ ] All tests pass: `cargo test`
 - [ ] No warnings: `cargo clippy`
 - [ ] Formatted: `cargo fmt`
+- [ ] Tests added for new features
 - [ ] Documentation updated
 - [ ] CHANGELOG.md updated
 - [ ] Commit messages are clear and descriptive
@@ -280,6 +332,9 @@ ls -lh target/release/*.wasm
 
 # Run full test suite
 cargo test --release
+
+# Verify all quality checks
+cargo fmt && cargo clippy && cargo test
 ```
 
 ## Publishing to Registry
@@ -309,6 +364,21 @@ Use `zed: open log` command in Zed to inspect:
 - API errors
 - Performance metrics
 
+### Debug Tests
+
+```bash
+# Run tests with output
+cargo test -- --nocapture
+
+# Run single test with output
+cargo test test_name -- --nocapture
+
+# Run tests in single-threaded mode
+cargo test -- --test-threads=1
+```
+
+See TESTING.md for more debugging tips.
+
 ### Common Issues & Solutions
 
 **Extension doesn't load:**
@@ -320,17 +390,26 @@ Use `zed: open log` command in Zed to inspect:
 - Review Zed.log for panic messages
 - Simplify recent changes to isolate issue
 - Test with minimal code
+- Run `cargo test` to verify tests still pass
 
 **Performance degradation:**
 - Profile with `cargo flamegraph`
 - Check for blocking operations
 - Review memory usage
+- Run benchmarks if available
+
+**Tests failing:**
+- Run `cargo test -- --nocapture` to see output
+- Check TESTING.md for debugging strategies
+- Verify recent code changes don't break invariants
 
 ## Useful Resources
 
+- [TESTING.md](./TESTING.md) — Comprehensive testing guide
 - [Zed Extension API Docs](https://zed.dev/docs/extensions)
 - [Zed Extension Capabilities](https://zed.dev/docs/extensions/capabilities.html)
 - [Rust WebAssembly Book](https://rustwasm.github.io/book/)
+- [Rust Testing Documentation](https://doc.rust-lang.org/book/ch11-00-testing.html)
 - [Tokio Async Tutorial](https://tokio.rs/tokio/tutorial)
 - [OpenAI API Docs](https://platform.openai.com/docs)
 - [Anthropic Claude Docs](https://docs.anthropic.com/)
@@ -343,4 +422,5 @@ This project is MIT licensed. See LICENSE file for details.
 
 **Last Updated:** 2024
 **Current Version:** 0.0.1
+**Status:** Phase 1 - Foundation (Unit Test Framework Complete ✅)
 **Maintainers:** Zed Copilot Contributors
