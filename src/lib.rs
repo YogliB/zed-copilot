@@ -1,14 +1,23 @@
 use zed_extension_api as zed;
 
-/// ZedCopilot extension structure
-/// Implements the Extension trait to provide AI-powered code completion
-/// and assistance features within Zed IDE
 pub struct ZedCopilot;
+
+impl ZedCopilot {
+    pub fn new() -> Self {
+        println!("[Zed Copilot] Extension initialized");
+        ZedCopilot
+    }
+}
+
+impl Default for ZedCopilot {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl zed::Extension for ZedCopilot {
     fn new() -> Self {
-        println!("[Zed Copilot] Extension initialized");
-        ZedCopilot
+        <Self as std::default::Default>::default()
     }
 }
 
@@ -19,23 +28,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_zed_copilot_creation() {
-        // Verify that ZedCopilot can be instantiated
-        let _extension = ZedCopilot::new();
-        // If this test passes, the struct is properly defined
+    fn test_zed_copilot_new() {
+        let extension = ZedCopilot::new();
+        let _ = extension;
     }
 
     #[test]
-    fn test_extension_trait_implemented() {
-        // This test verifies that ZedCopilot implements the Extension trait
-        // by successfully creating an instance via the trait's new() method
-        let _extension = <ZedCopilot as zed::Extension>::new();
-        // Successful instantiation means the trait is properly implemented
+    fn test_zed_copilot_default() {
+        let extension = ZedCopilot::default();
+        let _ = extension;
     }
 
-    // Future tests as features are added:
-    // - test_ai_provider_initialization
-    // - test_completion_engine
-    // - test_context_extraction
-    // - test_error_handling
+    #[test]
+    fn test_extension_trait_new() {
+        let _extension = <ZedCopilot as zed::Extension>::new();
+    }
+
+    #[test]
+    fn test_multiple_instances() {
+        let _ext1 = ZedCopilot::new();
+        let _ext2 = ZedCopilot::new();
+        let _ext3 = ZedCopilot::default();
+    }
+
+    #[test]
+    fn test_extension_initialization_does_not_panic() {
+        let result = std::panic::catch_unwind(|| {
+            let _extension = ZedCopilot::new();
+        });
+        assert!(result.is_ok());
+    }
 }

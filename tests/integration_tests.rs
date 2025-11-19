@@ -1,40 +1,54 @@
-// Integration tests for Zed Copilot extension
-// These tests verify that the extension loads correctly and behaves as expected
+mod common;
+
+use common::TestContext;
 
 #[test]
-fn test_extension_compiles() {
-    // This test verifies that the extension code compiles without errors
-    // It will pass if the crate builds successfully
+fn test_extension_compiles_and_loads() {
+    let context = TestContext::new();
+    assert_eq!(context.extension_name, "zed-copilot");
 }
 
 #[test]
-fn test_extension_structure() {
-    // Future test: Verify extension metadata is correct
-    // - extension.toml has valid structure
-    // - Cargo.toml has correct dependencies
-    // - Version consistency across files
+fn test_extension_can_be_created_via_default() {
+    let context = TestContext::default();
+    assert_eq!(context.extension_name, "zed-copilot");
 }
 
 #[test]
-fn test_extension_registration() {
-    // Future test: Verify extension registration
-    // - ZedCopilot struct is properly defined
-    // - Extension trait is implemented
-    // - register_extension! macro works correctly
+fn test_extension_does_not_panic_on_creation() {
+    let result = std::panic::catch_unwind(|| {
+        let _context = TestContext::new();
+    });
+    assert!(
+        result.is_ok(),
+        "Extension context creation should not panic"
+    );
 }
 
 #[test]
-fn test_extension_initialization() {
-    // Future test: Verify extension initialization
-    // - ZedCopilot::new() creates instance successfully
-    // - Logging on startup works correctly
-    // - No panics during initialization
+fn test_test_context_can_be_created() {
+    let context = TestContext::new();
+    assert!(!context.extension_name.is_empty());
 }
 
-// These tests serve as placeholders for future test implementations
-// as the extension functionality develops in subsequent versions.
-//
-// To run these tests:
-//   cargo test
-//
-// For integration tests with actual Zed IDE interaction, see DEVELOPMENT.md
+#[test]
+fn test_multiple_contexts_can_coexist() {
+    let ctx1 = TestContext::new();
+    let ctx2 = TestContext::new();
+    let ctx3 = TestContext::default();
+    assert_eq!(ctx1.extension_name, ctx2.extension_name);
+    assert_eq!(ctx2.extension_name, ctx3.extension_name);
+}
+
+#[test]
+fn test_test_context_default_implementation() {
+    let context = TestContext::default();
+    assert_eq!(context.extension_name, "zed-copilot");
+}
+
+#[test]
+fn test_extension_name_is_consistent() {
+    let ctx1 = TestContext::new();
+    let ctx2 = TestContext::new();
+    assert_eq!(ctx1.extension_name, ctx2.extension_name);
+}
