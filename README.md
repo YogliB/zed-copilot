@@ -20,9 +20,17 @@ Zed Copilot brings an interactive AI chat interface directly into Zed IDE. **Ask
 - 💾 **Session Persistence** — Chat history persists across editor sessions
 - ⚡ **Fast & Responsive** — Sub-second response latency with streaming updates
 
+### Must-Have Integration: GitHub Copilot LSP ⭐
+- 🔧 **Inline Code Completions** — Real-time suggestions as you type (Phase 4)
+- 🔐 **GitHub Authentication** — Seamless integration with GitHub Copilot subscription
+- ⚡ **Native LSP Protocol** — Standard Language Server Protocol for reliability
+- 🎯 **Smart Completions** — Context-aware suggestions across 50+ languages
+- 🔄 **Copilot Chat Integration** — Route chat requests through Copilot API for consistency
+
+See [GH_COPILOT_LSP_INTEGRATION.md](docs/GH_COPILOT_LSP_INTEGRATION.md) for implementation details.
+
 ### Optional Features (Future)
-- 🎯 Code completion (inline suggestions)
-- 🔧 Code refactoring assistance
+- 🔧 Advanced code refactoring assistance
 - 📝 Documentation generation
 - ✅ Test generation
 - 🐛 Debugging helpers
@@ -214,6 +222,26 @@ Look for `[Zed Copilot]` prefixed log messages.
 3. Configure in Zed settings with `"provider": "anthropic"`
 
 **Status:** Ready for use (Phase 2.1 complete)
+
+### GitHub Copilot LSP ⭐ Must-Have Integration
+
+**Models:** Claude 3 (via GitHub Copilot API)
+
+**Features:**
+- 🔧 Inline code completions via Language Server Protocol
+- 🔐 Seamless GitHub authentication and subscription integration
+- ⚡ Native LSP protocol for reliability and performance
+- 🎯 Smart, context-aware suggestions across 50+ languages
+- 🔄 Copilot Chat integration for consistent AI responses
+
+**Setup:**
+1. Authenticate with GitHub: `gh auth login`
+2. Enable in Zed settings with `"provider": "github_copilot"`
+3. Configure LSP server settings (auto-detected by default)
+
+**Status:** Planned (Phase 4, Q3 2025+) — **Critical must-have integration for inline completions**
+
+**Documentation:** See [GH_COPILOT_LSP_INTEGRATION.md](docs/GH_COPILOT_LSP_INTEGRATION.md) for comprehensive implementation strategy and roadmap.
 
 ### Other Providers (Future)
 
