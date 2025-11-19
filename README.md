@@ -2,30 +2,44 @@
 
 [![CI](https://github.com/yourusername/zed-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/zed-copilot/actions/workflows/ci.yml)
 
-AI-powered code completion and assistance for Zed IDE.
+An AI-powered chat assistant for Zed IDE. Ask questions about code, get explanations, and collaborate with AI—all within your editor.
 
 ## Overview
 
-Zed Copilot is an extension for the Zed code editor that brings intelligent AI-powered features to your coding workflow. This extension provides a foundation for integrating various AI providers to enhance productivity through code completions, suggestions, and analysis.
+Zed Copilot brings an interactive AI chat interface directly into Zed IDE. **Ask your AI assistant anything about your code** — get explanations, debugging help, refactoring suggestions, and more. The extension supports multiple AI providers (OpenAI, Anthropic Claude) and is designed for a seamless, conversation-driven development workflow.
 
 ## Features
 
-- 🤖 AI-powered code assistance
-- ⚡ Fast, responsive interactions
-- 🔧 Extensible architecture for multiple AI providers
-- 📝 Clean, maintainable codebase
-- 🛠️ Built with Rust and WebAssembly
+### Primary Feature: AI Chat
+- 💬 **Interactive Chat Panel** — Ask questions about code in a conversation
+- 🚀 **Real-time Streaming** — See AI responses as they're generated
+- 📚 **Conversation History** — Maintain context across multiple exchanges
+- 🔄 **Multi-turn Conversations** — Natural back-and-forth dialogue with AI
+- 📍 **Code Context Awareness** — Reference current file, cursor position, or selected code
+- 🤖 **Multiple AI Providers** — Choose between OpenAI (GPT-4, GPT-3.5) or Anthropic (Claude 3)
+- 💾 **Session Persistence** — Chat history persists across editor sessions
+- ⚡ **Fast & Responsive** — Sub-second response latency with streaming updates
 
-## Installation
+### Optional Features (Future)
+- 🎯 Code completion (inline suggestions)
+- 🔧 Code refactoring assistance
+- 📝 Documentation generation
+- ✅ Test generation
+- 🐛 Debugging helpers
+
+## Quick Start
 
 ### Prerequisites
 
 - **Zed IDE** (latest version from [zed.dev](https://zed.dev))
-- **Rust** (installed via rustup - **not** Homebrew)
+- **Rust** (installed via rustup)
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   source $HOME/.cargo/env
   ```
+- **API Key** for at least one provider:
+  - OpenAI: https://platform.openai.com/api-keys
+  - Anthropic: https://console.anthropic.com/keys
 
 ### Install as Dev Extension
 
@@ -35,21 +49,74 @@ Zed Copilot is an extension for the Zed code editor that brings intelligent AI-p
    cd zed-copilot
    ```
 
-2. Open Zed IDE
+2. Build the extension:
+   ```bash
+   cargo build --release
+   ```
 
-3. Go to **Extensions** panel (or use `zed: open extensions` command)
+3. Open **Zed IDE**
 
-4. Click **Install Dev Extension** (or use `zed: install dev extension` action)
+4. Open **Extensions** panel (`zed: open extensions`)
 
-5. Select the `zed-copilot` directory
+5. Click **Install Dev Extension**
 
-6. The extension will load immediately
+6. Select the `zed-copilot` directory
+
+7. The extension will load immediately — look for the chat panel
+
+### Configure Your AI Provider
+
+1. Open Zed settings: `cmd+,` (macOS) or `ctrl+,` (Linux/Windows)
+
+2. Add your API key (currently requires manual `settings.json` edit in Phase 2.2):
+   ```json
+   {
+     "zed_copilot": {
+       "enabled": true,
+       "provider": "openai",
+       "openai": {
+         "api_key": "${OPENAI_API_KEY}",
+         "model": "gpt-4"
+       }
+     }
+   }
+   ```
+
+3. Set environment variable with your API key:
+   ```bash
+   export OPENAI_API_KEY="sk-..."
+   ```
+
+4. Restart Zed
+
+5. Open the chat panel and start chatting! (Chat UI coming in Phase 3)
 
 ### Verify Installation
 
-- Check the Extensions page - you should see "Zed Copilot" listed
-- Open Zed log with `zed: open log` to verify no errors on startup
-- Look for `[Zed Copilot] Extension initialized` in the logs
+- Check the Extensions page — "Zed Copilot" should be listed ✅
+- Open Zed log: `zed: open log`
+- Look for: `[Zed Copilot] Extension initialized`
+
+## Project Status
+
+### Current Phase: 2.2 (Configuration & Credentials)
+
+**Completed:**
+- ✅ Extension foundation (Phase 1)
+- ✅ AI provider abstraction (Phase 2.1)
+- ✅ OpenAI & Anthropic provider implementations (Phase 2.1)
+- ✅ 40+ tests, all passing
+
+**In Progress:**
+- 🔄 Configuration system (Phase 2.2)
+- 🔄 Secure credential management (Phase 2.2)
+
+**Coming Soon:**
+- 📅 HTTP integration & streaming (Phase 2.3) — Q1 2025
+- 📅 **Chat UI & Core Feature** (Phase 3) — Q2 2025
+- 📅 Code completions (Phase 4) — Q3 2025+
+
+See the [ROADMAP.md](docs/ROADMAP.md) for the complete project timeline and vision.
 
 ## Development
 
@@ -57,35 +124,49 @@ Zed Copilot is an extension for the Zed code editor that brings intelligent AI-p
 
 ```
 zed-copilot/
-├── extension.toml          # Extension metadata and configuration
-├── Cargo.toml              # Rust project configuration
+├── extension.toml          # Extension metadata
+├── Cargo.toml              # Rust dependencies
 ├── src/
-│   └── lib.rs              # Main extension implementation
+│   ├── lib.rs              # Main extension & tests
+│   └── providers/          # AI provider implementations
+│       ├── mod.rs
+│       ├── openai.rs       # OpenAI provider
+│       ├── anthropic.rs    # Anthropic provider
+│       ├── trait_def.rs    # AiProvider trait
+│       ├── factory.rs      # Provider factory
+│       └── error.rs        # Error types
+├── tests/
+│   ├── common/mod.rs       # Test utilities
+│   └── integration_tests.rs
 ├── docs/
-│   ├── DEVELOPMENT.md      # Development guide and architecture
-│   ├── CHANGELOG.md        # Version history
+│   ├── ROADMAP.md          # Feature roadmap
+│   ├── DEVELOPMENT.md      # Architecture & design
+│   ├── TESTING.md          # Testing guide
 │   ├── SETUP.md            # Setup instructions
 │   ├── QUICKSTART.md       # Quick start guide
-│   └── EXECUTION_SUMMARY.md # Execution summary
+│   └── PROVIDER_INTEGRATION.md
 ├── README.md               # This file
 ├── LICENSE                 # MIT License
-└── .gitignore              # Git ignore rules
+└── Makefile                # Development commands
 ```
 
-### Building & Development Commands
-
-Use the Makefile for convenient shortcuts:
+### Build & Development
 
 ```bash
-# Run all quality checks (format, lint, test)
-make check-all
+# Format code
+make fmt
 
-# Individual commands
-make fmt       # Format code with rustfmt
-make clippy    # Lint code with clippy
-make test      # Run all tests
-make build     # Build debug binary
-make release   # Build optimized release binary
+# Lint code
+make clippy
+
+# Run all tests
+make test
+
+# Build for development
+cargo build
+
+# Build for release
+cargo build --release
 
 # View all available commands
 make help
@@ -94,66 +175,133 @@ make help
 Or use cargo directly:
 
 ```bash
-# Build the extension
 cargo build --release
-
-# The compiled WebAssembly will be in target/release/
+cargo test
+cargo fmt
+cargo clippy
 ```
 
 ### Debug Mode
 
-Run Zed in foreground mode to see extension logs and debug output:
+Run Zed in foreground mode to see extension logs:
 
 ```bash
 zed --foreground
 ```
 
-This will display `println!` output and detailed logging from the extension.
+Look for `[Zed Copilot]` prefixed log messages.
 
-### Running Tests
+## Supported AI Providers
+
+### OpenAI ✅
+
+**Models:** GPT-4, GPT-3.5-turbo
+
+**Setup:**
+1. Get API key from https://platform.openai.com/api-keys
+2. Set environment variable: `export OPENAI_API_KEY="sk-..."`
+3. Configure in Zed settings (see Configuration section above)
+
+**Status:** Ready for use (Phase 2.1 complete)
+
+### Anthropic Claude ✅
+
+**Models:** Claude 3 Opus, Sonnet, Haiku
+
+**Setup:**
+1. Get API key from https://console.anthropic.com/keys
+2. Set environment variable: `export ANTHROPIC_API_KEY="sk-ant-..."`
+3. Configure in Zed settings with `"provider": "anthropic"`
+
+**Status:** Ready for use (Phase 2.1 complete)
+
+### Other Providers (Future)
+
+Planned support for:
+- Local models via Ollama
+- Self-hosted LLM services
+- Additional commercial providers
+
+## Configuration
+
+### Settings File Format
+
+Configuration is done via Zed's `settings.json`:
+
+```json
+{
+  "zed_copilot": {
+    "enabled": true,
+    "provider": "openai",
+    "openai": {
+      "api_key": "${OPENAI_API_KEY}",
+      "model": "gpt-4",
+      "api_base": "https://api.openai.com/v1"
+    },
+    "anthropic": {
+      "api_key": "${ANTHROPIC_API_KEY}",
+      "model": "claude-3-sonnet",
+      "api_base": "https://api.anthropic.com/v1"
+    },
+    "chat": {
+      "streaming_enabled": true,
+      "max_history_messages": 50,
+      "auto_scroll_to_latest": true
+    }
+  }
+}
+```
+
+**Key Points:**
+- API keys use environment variable interpolation (`${VARIABLE_NAME}`)
+- No credentials are hardcoded
+- Set environment variables before starting Zed
+- Optional: customize API base URL (for proxies, self-hosted, etc.)
+
+### Environment Variables
 
 ```bash
-# Run all tests
-make test
+# OpenAI
+export OPENAI_API_KEY="sk-..."
 
-# Or with cargo directly
-cargo test
+# Anthropic
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Load these automatically by adding to your shell profile (`~/.zshrc`, `~/.bashrc`, etc.):
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
 ## Troubleshooting
 
-### Extension fails to load
+### Extension Won't Load
 
-**Error:** "Failed to install dev extension"
-
-**Solutions:**
 1. Verify Rust is installed via rustup:
    ```bash
    rustup --version
    ```
-   
-2. Make sure you don't have Rust installed via Homebrew. If you do:
-   ```bash
-   brew uninstall rust  # if installed via Homebrew
-   rustup update stable
-   ```
 
-3. Check Zed logs: `zed: open log`
-
-4. Rebuild the extension:
+2. Rebuild the extension:
    ```bash
    cargo clean
    cargo build --release
    ```
 
-### Build compilation errors
+3. Check Zed logs:
+   ```
+   zed: open log
+   ```
 
-**Error:** "error: could not compile `zed-copilot`"
+4. Make sure you installed via **Install Dev Extension**, not from the registry
 
-**Solutions:**
-1. Ensure you're using Rust edition 2021:
+### Build Fails
+
+1. Update Rust:
    ```bash
-   rustc --version
+   rustup update stable
    ```
 
 2. Update dependencies:
@@ -161,26 +309,21 @@ cargo test
    cargo update
    ```
 
-3. Check `zed_extension_api` version compatibility in `Cargo.toml`
+3. Check the error message and refer to [SETUP.md](docs/SETUP.md)
 
-### No log output
+### Chat Panel Doesn't Appear
 
-**Problem:** Can't see extension logs
+- Chat UI is coming in Phase 3 (Q2 2025)
+- For now, the extension loads but has no visible UI
+- Configuration UI is planned for Phase 2.2
 
-**Solutions:**
-1. Run Zed in foreground mode: `zed --foreground`
-2. Make sure the extension is actually loaded by checking Extensions page
-3. Check that extension builds without errors: `cargo build --release`
+### API Errors
 
-## Configuration
-
-Currently, Zed Copilot has minimal configuration. Future versions will support:
-- AI provider selection (OpenAI, Anthropic, etc.)
-- API key management
-- Feature toggles
-- Custom prompts and behaviors
-
-See `docs/DEVELOPMENT.md` for planned features and architecture.
+1. Verify your API key is correct and set as environment variable
+2. Check that API key is included in Zed settings
+3. Verify the model name is correct for your provider
+4. Check your API account has available quota
+5. Review Zed logs for detailed error messages
 
 ## Contributing
 
@@ -188,37 +331,49 @@ Contributions are welcome! Please:
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes
-4. Test locally as a dev extension
+3. Follow the coding rules in [zed-rules/AGENTS.md](https://github.com/zed-industries/zed-rules/blob/main/AGENTS.md)
+4. Run tests and linting:
+   ```bash
+   make check-all
+   ```
 5. Commit with clear messages
 6. Push and open a pull request
 
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
-
 ## Documentation
 
-- [DEVELOPMENT.md](docs/DEVELOPMENT.md) - Architecture, planned features, and development guidelines
-- [CHANGELOG.md](docs/CHANGELOG.md) - Version history and release notes
-- [SETUP.md](docs/SETUP.md) - Setup and installation instructions
-- [QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide
-- [Zed Extension Docs](https://zed.dev/docs/extensions) - Official Zed extension documentation
+- [ROADMAP.md](docs/ROADMAP.md) — Feature roadmap and timeline
+- [DEVELOPMENT.md](docs/DEVELOPMENT.md) — Architecture and design decisions
+- [SETUP.md](docs/SETUP.md) — Detailed setup and troubleshooting
+- [QUICKSTART.md](docs/QUICKSTART.md) — 5-minute quick start
+- [TESTING.md](docs/TESTING.md) — Testing strategy and guidelines
+- [PROVIDER_INTEGRATION.md](docs/PROVIDER_INTEGRATION.md) — AI provider details
+- [DOCUMENTATION_REVIEW.md](docs/DOCUMENTATION_REVIEW.md) — Documentation alignment review
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Support
 
-For issues, questions, or suggestions:
-- Open an issue on GitHub
-- Check existing issues for solutions
-- Review troubleshooting section above
+Need help?
+
+- 📖 Read [SETUP.md](docs/SETUP.md) for setup issues
+- 🚀 Check [QUICKSTART.md](docs/QUICKSTART.md) to get started
+- 🏗️ Review [DEVELOPMENT.md](docs/DEVELOPMENT.md) for architecture
+- 🐛 Open a GitHub issue for bugs
+- 💬 Discussions available for questions
 
 ## Acknowledgments
 
 - [Zed Industries](https://zed.dev) for the amazing editor and extension API
+- [OpenAI](https://openai.com) and [Anthropic](https://www.anthropic.com) for AI APIs
 - All contributors and community members
 
 ---
 
-**Status:** Early Development (v0.0.1)
+**Current Status:** Early Development (Phase 2.2)  
+**Primary Feature:** AI Chat (coming Phase 3)  
+**Latest Release:** v0.0.1 — Foundation complete  
+**Next Milestone:** Configuration & Credentials (Phase 2.2)  
 
-This is the foundation for AI-powered features in Zed. More features coming soon!
+🚀 **Chat interface coming in Q2 2025!**

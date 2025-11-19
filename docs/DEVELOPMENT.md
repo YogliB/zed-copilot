@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-Zed Copilot is built as a WebAssembly-based extension for Zed IDE using Rust. The architecture is designed to be modular and extensible, supporting multiple AI providers and feature types.
+Zed Copilot is built as a WebAssembly-based extension for Zed IDE using Rust. The architecture is designed to be modular and extensible, with **chat as the primary feature** and code completion as an optional secondary feature.
 
 ### Core Components
 
@@ -12,19 +12,24 @@ Zed Copilot is built as a WebAssembly-based extension for Zed IDE using Rust. Th
 ├─────────────────────────────────────────────────┤
 │  Zed Copilot Extension (WebAssembly)            │
 │  ┌──────────────────────────────────────────┐   │
-│  │ ZedCopilot (Extension Struct)            │   │
-│  │ ├── AI Provider Manager                  │   │
-│  │ ├── Completion Engine                    │   │
-│  │ ├── Context Manager                      │   │
-│  │ └── Logger/Telemetry                     │   │
+│  │ ZedCopilot (Extension)                   │   │
+│  ├── Chat Engine (Phase 3)                  │   │
+│  ├── Chat UI Panel (Phase 3)                │   │
+│  ├── Message History Manager (Phase 3)      │   │
+│  ├── Configuration Manager (Phase 2.2)      │   │
+│  ├── AI Provider Manager (Phase 2.1)        │   │
+│  ├── Streaming Response Handler (Phase 2.3) │   │
+│  ├── Context Manager (Phase 3)              │   │
+│  ├── Logger/Telemetry                       │   │
+│  └── (Future: Completion Engine - Phase 4)  │   │
 │  └──────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────┘
          ↓
 ┌─────────────────────────────────────────────────┐
-│  External AI Providers (Future)                 │
-│  ├── OpenAI API                                 │
-│  ├── Anthropic Claude API                       │
-│  └── Other LLM Providers                        │
+│  External AI Providers (Phase 2.1 Complete)     │
+│  ├── OpenAI API (GPT-4, GPT-3.5-turbo)         │
+│  ├── Anthropic Claude API (Claude 3 family)     │
+│  └── Future: Ollama, self-hosted, others        │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -33,78 +38,154 @@ Zed Copilot is built as a WebAssembly-based extension for Zed IDE using Rust. Th
 Currently, the extension provides:
 - **Extension Registration**: Basic ZedCopilot struct implementing the Extension trait
 - **Initialization**: Logging on startup to verify proper loading
-- **Test Framework**: Unit and integration tests with 14 passing tests
-- **Foundation**: Ready for AI provider integration in Phase 2
+- **Test Framework**: Unit and integration tests with 40+ passing tests
+- **Provider Abstraction**: Complete AI provider interface (Phase 2.1) ✅
+- **Foundation**: Ready for configuration system (Phase 2.2)
 
-### Extension Trait Implementation
+### Phase-by-Phase Component Rollout
 
-The `ZedCopilot` struct implements Zed's `Extension` trait with:
-- `new()`: Initializes the extension with logging
-- `Default`: Provides default instantiation path
-- Full test coverage with unit and integration tests
+| Component | Phase | Status | Purpose |
+|-----------|-------|--------|---------|
+| Extension Struct | 1 | ✅ Complete | Loads extension in Zed |
+| Provider Trait | 2.1 | ✅ Complete | Abstract AI provider interface |
+| OpenAI Provider | 2.1 | ✅ Complete | GPT-4, GPT-3.5-turbo support |
+| Anthropic Provider | 2.1 | ✅ Complete | Claude 3 family support |
+| Configuration Manager | 2.2 | 🔄 In Progress | Load settings, manage credentials |
+| HTTP Client | 2.3 | ⏳ Planned | Make API calls, handle responses |
+| Streaming Support | 2.3 | ⏳ Planned | Stream responses token-by-token |
+| Chat Engine | 3 | ⏳ Planned | Handle conversations, context |
+| Chat UI Panel | 3 | ⏳ Planned | Zed UI integration for chat |
+| Message History | 3 | ⏳ Planned | Store and retrieve conversation |
+| Completion Engine | 4 | ⏳ Optional | Inline code completion (optional) |
 
 ## Project Structure
 
 ```
 zed-copilot/
-├── extension.toml          # Zed extension metadata
-├── Cargo.toml              # Rust dependencies and build config
+├── extension.toml              # Zed extension metadata
+├── Cargo.toml                  # Rust dependencies and build config
 ├── src/
-│   ├── lib.rs              # Main extension implementation (with unit tests)
-│   ├── provider/            # (Planned) AI provider abstraction
+│   ├── lib.rs                  # Main extension (with unit tests)
+│   │
+│   ├── providers/              # AI provider abstraction (Phase 2.1 ✅)
+│   │   ├── mod.rs              # Module exports
+│   │   ├── trait_def.rs        # AiProvider trait definition
+│   │   ├── openai.rs           # OpenAI provider implementation
+│   │   ├── anthropic.rs        # Anthropic Claude provider
+│   │   ├── factory.rs          # Provider factory pattern
+│   │   ├── error.rs            # Error types and handling
+│   │   └── (with tests)         # 31 unit tests
+│   │
+│   ├── config/                 # Configuration system (Phase 2.2)
+│   │   ├── mod.rs              # Module root
+│   │   ├── settings.rs         # Zed settings parsing
+│   │   ├── credentials.rs      # Credential management
+│   │   └── validation.rs       # Config validation
+│   │
+│   ├── http/                   # HTTP client (Phase 2.3)
 │   │   ├── mod.rs
-│   │   ├── openai.rs
-│   │   └── anthropic.rs
-│   ├── completion/          # (Planned) Completion logic
-│   │   └── mod.rs
-│   ├── context/             # (Planned) Context extraction
-│   │   └── mod.rs
-│   └── telemetry/           # (Planned) Logging and metrics
-│       └── mod.rs
+│   │   ├── client.rs           # HTTP client wrapper
+│   │   ├── streaming.rs        # Streaming response handling
+│   │   └── retry.rs            # Retry logic with backoff
+│   │
+│   ├── chat/                   # Chat engine (Phase 3)
+│   │   ├── mod.rs
+│   │   ├── engine.rs           # Chat conversation logic
+│   │   ├── message.rs          # Message types
+│   │   ├── history.rs          # Conversation history
+│   │   └── context.rs          # Code context integration
+│   │
+│   ├── ui/                     # UI integration (Phase 3)
+│   │   ├── mod.rs
+│   │   ├── panel.rs            # Chat panel component
+│   │   ├── events.rs           # User input handling
+│   │   └── rendering.rs        # Response rendering
+│   │
+│   └── completion/             # Completion engine (Phase 4 - Optional)
+│       ├── mod.rs
+│       └── engine.rs           # Inline completion logic
+│
 ├── tests/
 │   ├── common/
-│   │   └── mod.rs          # Shared test utilities (with tests)
-│   └── integration_tests.rs # Integration tests
+│   │   └── mod.rs              # Shared test utilities
+│   ├── integration_tests.rs    # Integration tests
+│   └── chat_tests.rs           # Chat-specific tests (Phase 3)
+│
 ├── docs/
-│   ├── DEVELOPMENT.md       # This file
-│   ├── ROADMAP.md           # Project roadmap and planned features
-│   └── TESTING.md           # Comprehensive testing guide
-├── README.md                # User guide
-├── CHANGELOG.md             # Version history
-├── LICENSE                  # MIT License
-└── .gitignore               # Git ignore rules
+│   ├── DEVELOPMENT.md          # This file
+│   ├── ROADMAP.md              # Project roadmap and milestones
+│   ├── CHAT_ARCHITECTURE.md    # Chat design details (Phase 3)
+│   ├── UI_INTEGRATION.md       # Zed UI APIs (Phase 3)
+│   ├── CONFIGURATION.md        # Settings format (Phase 2.2)
+│   ├── PROVIDER_INTEGRATION.md # Provider reference
+│   ├── TESTING.md              # Testing guide
+│   ├── DOCUMENTATION_REVIEW.md # Alignment review
+│   └── CHANGELOG.md            # Version history
+│
+├── README.md                   # User guide
+├── LICENSE                     # MIT License
+├── Makefile                    # Development commands
+└── .gitignore                  # Git ignore rules
 ```
 
 ## Development Workflow
 
 ### Setup Development Environment
 
-1. Clone the repository and navigate to it
-2. Ensure Rust is installed via rustup
-3. Build the project: `cargo build --release`
-4. Install as dev extension in Zed
-5. Test with `zed --foreground` for debug output
+1. Clone the repository and navigate to it:
+   ```bash
+   git clone https://github.com/zed-industries/zed-copilot.git
+   cd zed-copilot
+   ```
+
+2. Ensure Rust is installed via rustup (not Homebrew):
+   ```bash
+   rustup --version
+   rustup update stable
+   ```
+
+3. Build the project:
+   ```bash
+   cargo build --release
+   ```
+
+4. Install as dev extension in Zed:
+   - Open Zed IDE
+   - Go to Extensions panel (`zed: open extensions`)
+   - Click "Install Dev Extension"
+   - Select the `zed-copilot` directory
+
+5. Verify it loads:
+   ```bash
+   zed --foreground
+   ```
+   Look for `[Zed Copilot] Extension initialized` in logs.
 
 ### Making Changes
 
 1. Edit source files in `src/`
-2. Run `cargo build --release` to compile
-3. Reload extension in Zed (may require restart)
-4. Check `zed: open log` for any errors
-5. Write tests in `tests/` directory (see TESTING.md for guidelines)
+2. Run tests to verify changes: `cargo test`
+3. Format code: `cargo fmt`
+4. Check for warnings: `cargo clippy`
+5. Rebuild: `cargo build --release`
+6. Reload extension in Zed (may require restart)
+7. Check `zed: open log` for any errors
 
 ### Code Standards
 
-- Follow Rust conventions (rustfmt, clippy)
-- Add documentation comments for public items
-- Use meaningful error messages
-- Keep functions focused and testable
-- Log important events for debugging
-- Write tests for new functionality (see TESTING.md)
+Follow the [zed-rules](../zed-rules/AGENTS.md) coding guidelines:
+
+- **Clear names** — Functions as verbs (`fetchUserProfile`), types as nouns (`RetryPolicy`)
+- **Small functions** — One responsibility per function
+- **No comments** — Code should explain itself through naming and structure
+- **Type safety** — Use Rust's type system to prevent bugs
+- **Early returns** — Simple control flow
+- **Pure functions** — Minimize side effects
+- **Tests** — Write tests for new functionality (see TESTING.md)
 
 ### Running Checks
 
-Use the Makefile for convenient command shortcuts:
+Use the Makefile for convenient shortcuts:
 
 ```bash
 # Run all quality checks (fmt, clippy, test)
@@ -114,12 +195,6 @@ make check-all
 make fmt          # Format code with rustfmt
 make clippy       # Lint code with clippy
 make test         # Run all tests
-
-# Specific test suites
-make test-lib     # Unit tests only
-make test-int     # Integration tests only
-
-# Building
 make build        # Build debug binary
 make release      # Build optimized release binary
 
@@ -127,34 +202,18 @@ make release      # Build optimized release binary
 make help
 ```
 
-Or run cargo commands directly:
+Or use cargo directly:
 
 ```bash
-# Format code
 cargo fmt
-
-# Check for warnings and issues
 cargo clippy
-
-# Run all tests
 cargo test
-
-# Run tests with output
-cargo test -- --nocapture
-
-# Run unit tests only
-cargo test --lib
-
-# Run integration tests only
-cargo test --test '*'
-
-# Check documentation
-cargo doc --no-deps --open
+cargo build --release
 ```
 
 ## Testing
 
-Zed Copilot includes a comprehensive test framework with 14 passing tests (5 unit + 9 integration).
+Zed Copilot includes comprehensive tests at all levels: unit, integration, and component-specific.
 
 ### Quick Start
 
@@ -162,70 +221,63 @@ Zed Copilot includes a comprehensive test framework with 14 passing tests (5 uni
 # Run all tests
 cargo test
 
-# Run tests with output (including println!)
+# Run tests with output
 cargo test -- --nocapture
 
 # Run specific test
 cargo test test_zed_copilot_new
+
+# Run only unit tests
+cargo test --lib
+
+# Run only integration tests
+cargo test --test '*'
 ```
 
 ### Test Structure
 
-- **Unit Tests**: Located in `src/lib.rs`, test individual components
-- **Integration Tests**: Located in `tests/integration_tests.rs`, test component interactions
-- **Test Utilities**: Shared helpers in `tests/common/mod.rs`
+- **Unit Tests**: Located in each module (`#[cfg(test)]` blocks), test individual components
+- **Integration Tests**: Located in `tests/`, test component interactions
+- **Provider Tests**: Located in `src/providers/`, comprehensive provider testing
+- **Chat Tests**: Located in `tests/chat_tests.rs`, chat-specific flows (Phase 3)
 
 ### Current Test Coverage
 
-- **Unit Tests (5)**: ZedCopilot instantiation, Default trait, Extension trait, panic handling
-- **Integration Tests (9)**: Extension initialization, context creation, stability tests
+- **Provider Tests (31)**: Provider instantiation, trait methods, factory, error handling ✅
+- **Extension Tests (9)**: ZedCopilot initialization and integration ✅
+- **Total: 40+ tests, all passing** ✅
 
-### Adding New Tests
+### Adding Tests
 
-When adding features, write tests following these patterns:
+When adding features, follow the Arrange-Act-Assert pattern:
 
 ```rust
-// Unit test (in src/lib.rs or a module)
 #[test]
-fn test_my_feature() {
+fn test_chat_sends_message() {
     // Arrange
-    let component = MyComponent::new();
+    let chat = ChatEngine::new();
+    let message = Message::new("Hello, AI!");
     
     // Act
-    let result = component.do_something();
+    let result = chat.send_message(message);
     
     // Assert
-    assert_eq!(result, expected_value);
+    assert!(result.is_ok());
 }
 ```
 
-See `docs/TESTING.md` for comprehensive testing guide with examples and best practices.
+See `docs/TESTING.md` for comprehensive testing guide.
 
 ## CI/CD Pipeline
 
-Zed Copilot uses GitHub Actions for automated testing, linting, and building. All pull requests and pushes to `main`/`develop` run through the CI pipeline.
+Zed Copilot uses GitHub Actions for automated quality checks on every commit and pull request.
 
 ### Automated Checks
 
-The CI pipeline runs four independent jobs:
-
-1. **Test Suite** — Runs all unit and integration tests
-   - Command: `cargo test --lib` + `cargo test --test '*'`
-   - Must pass: All 14 tests must succeed
-
-2. **Formatting** — Checks code follows Rust conventions
-   - Command: `cargo fmt -- --check`
-   - Auto-fix locally: `cargo fmt`
-
-3. **Linting** — Checks for code warnings and anti-patterns
-   - Command: `cargo clippy -- -D warnings`
-   - Warnings treated as errors; code must be warning-free
-
-4. **Build** — Verifies WASM binary compiles successfully
-   - Builds for target: `wasm32-unknown-unknown`
-   - Verifies binary exists
-   - Checks size is under 1.5MB threshold
-   - Uploads artifact for inspection
+1. **Tests** — All 40+ tests must pass
+2. **Formatting** — Code must be formatted with `cargo fmt`
+3. **Linting** — No warnings from `cargo clippy`
+4. **Build** — WASM binary must compile successfully
 
 ### Workflow Triggers
 
@@ -233,183 +285,326 @@ CI runs automatically on:
 - Push to `main` or `develop` branches
 - All pull requests to `main` or `develop`
 - Manual trigger via GitHub Actions UI
-- Changes to: `src/`, `tests/`, `Cargo.toml`, `Cargo.lock`, `extension.toml`
-
-Documentation-only changes (`.md`, `docs/`, `LICENSE`) skip CI.
 
 ### Running CI Locally
 
-To test your changes before pushing:
-
 ```bash
-# Run all quality checks locally
-cargo fmt && cargo clippy && cargo test
+# Run all quality checks
+cargo fmt && cargo clippy && cargo test && cargo build --release
 
-# Individual checks
-cargo fmt -- --check        # Check formatting
-cargo fmt                   # Auto-fix formatting
-cargo clippy                # Lint warnings
-cargo test                  # All tests
-cargo test --lib           # Unit tests only
-cargo test --test '*'      # Integration tests only
-cargo test -- --nocapture  # Show test output
-cargo test -- --test-threads=1  # Debug mode
-
-# Build WASM
-cargo build --release --target wasm32-unknown-unknown
-ls -lh target/wasm32-unknown-unknown/release/zed_copilot.wasm
+# Or use make
+make check-all
 ```
 
-### Using `act` to Simulate CI
+### Simulation with `act`
 
 Install [act](https://github.com/nektos/act) to run workflows locally:
 
 ```bash
-# macOS
 brew install act
-
-# Run entire CI pipeline
-act
-
-# Run specific job
-act -j test
-act -j build
-
-# Verbose output
-act -v
+act              # Run all jobs
+act -j test      # Run only test job
+act -v           # Verbose output
 ```
 
-### Configuration Files
+## Phase-by-Phase Development Guide
 
-- `.github/workflows/ci.yml` — Main CI pipeline definition
-- `.github/CONTRIBUTING.md` — Contribution guidelines with CI expectations
-- `.github/workflows/README.md` — Detailed workflow documentation
+### Phase 2.1: AI Provider Abstraction ✅ COMPLETE
 
-See [Contributing Guide](.github/CONTRIBUTING.md) for detailed CI/CD expectations.
+**Status:** Provider trait and implementations complete with 31 passing tests.
 
-## Known Issues & Limitations
+**Components:**
+- `AiProvider` trait defining interface
+- `OpenAiProvider` implementation
+- `AnthropicProvider` implementation
+- `ProviderFactory` for instantiation
+- `ProviderError` for error handling
 
-### v0.0.1
-- No AI integration yet (planned for Phase 2)
-- No configuration options (planned for Phase 2)
-- WASM limitations on std library features (documented in TESTING.md)
+**Key Files:**
+- `src/providers/trait_def.rs` — Provider trait
+- `src/providers/openai.rs` — OpenAI implementation
+- `src/providers/anthropic.rs` — Anthropic implementation
+- `src/providers/factory.rs` — Factory pattern
 
-## Contributing Guidelines
+**What's Needed for Phase 2.2:**
+- Configuration system to instantiate providers from settings
+- HTTP client to make actual API calls (Phase 2.3)
 
-### Before You Start
-1. Check existing issues to avoid duplication
-2. Discuss major changes in an issue first
-3. Follow the code standards listed above
-4. Add tests for new functionality (see TESTING.md)
+### Phase 2.2: Configuration & Credentials (CURRENT)
 
-### Submission Checklist
-- [ ] Code follows Rust conventions
-- [ ] All tests pass: `cargo test`
-- [ ] No warnings: `cargo clippy`
-- [ ] Formatted: `cargo fmt`
-- [ ] Tests added for new features
-- [ ] Documentation updated
-- [ ] CHANGELOG.md updated
-- [ ] Commit messages are clear and descriptive
+**Focus:** Enable users to configure API keys and select providers.
 
-### Review Process
-1. Automated checks must pass
-2. Code review by maintainers
-3. Manual testing
-4. Approval and merge
+**Components to Build:**
+1. **Configuration Parser** (`src/config/settings.rs`)
+   - Parse Zed settings.json
+   - Validate required fields
+   - Support environment variable interpolation
 
-## Building for Release
+2. **Credential Manager** (`src/config/credentials.rs`)
+   - Securely store/retrieve API keys
+   - Handle credential validation
+   - Support per-provider configuration
 
-```bash
-# Build optimized release binary
-cargo build --release
+3. **Configuration Validator** (`src/config/validation.rs`)
+   - Validate API keys format
+   - Check provider configuration completeness
+   - Error reporting with helpful messages
 
-# This generates: target/release/zed_copilot.wasm
+**Key Decisions:**
+- Where to store credentials (Zed API capabilities)
+- How to interpolate environment variables
+- Configuration schema for chat-specific settings
 
-# Verify size
-ls -lh target/release/*.wasm
+**Tests to Add:**
+- Configuration parsing tests
+- Credential validation tests
+- Environment variable interpolation tests
+- Error handling for invalid configs
 
-# Run full test suite
-cargo test --release
+**Deliverables:**
+- Configuration loading from Zed settings
+- Credential validation and error messages
+- Support for multiple providers simultaneously
+- Chat-ready configuration schema
 
-# Verify all quality checks
-cargo fmt && cargo clippy && cargo test
+### Phase 2.3: HTTP Integration & Streaming Support (NEXT)
+
+**Focus:** Make real API calls and support streaming responses for chat.
+
+**Components to Build:**
+1. **HTTP Client** (`src/http/client.rs`)
+   - Wrapper around `reqwest` crate
+   - Request building for OpenAI and Anthropic APIs
+   - Response parsing and validation
+
+2. **Streaming Handler** (`src/http/streaming.rs`)
+   - Parse streaming responses (SSE format)
+   - Buffer and emit tokens as they arrive
+   - Handle incomplete/malformed chunks
+
+3. **Retry Logic** (`src/http/retry.rs`)
+   - Exponential backoff for transient failures
+   - Configurable retry count and delays
+   - Error classification (retryable vs. permanent)
+
+**Key Decisions:**
+- Streaming protocol handling (SSE vs. chunked HTTP)
+- Token buffering strategy
+- Retry configuration (max attempts, backoff multiplier)
+- Timeout handling
+
+**Tests to Add:**
+- HTTP request/response tests (with mocks)
+- Streaming response parsing tests
+- Retry logic tests
+- Timeout handling tests
+
+**Deliverables:**
+- Functional HTTP client for API calls
+- Real-time streaming response support
+- Robust error recovery with retry logic
+- Full test coverage
+
+### Phase 3: Chat Interface (PRIMARY FEATURE) 📋 PLANNED
+
+**Focus:** Build the interactive chat interface — the main user-facing feature.
+
+**Components to Build:**
+1. **Chat Engine** (`src/chat/engine.rs`)
+   - Manage conversation state and flow
+   - Handle multi-turn interactions
+   - Integrate context from buffer
+   - Route messages to providers
+
+2. **Message History** (`src/chat/history.rs`)
+   - Store conversation messages
+   - Retrieve history for context
+   - Truncate long conversations
+   - Persist across sessions
+
+3. **Chat UI** (`src/ui/panel.rs`)
+   - Zed panel for chat interface
+   - Message display with streaming updates
+   - User input handling
+   - Error and status messages
+
+4. **Context Integration** (`src/chat/context.rs`)
+   - Extract file content
+   - Capture cursor position
+   - Get selected text
+   - Format for inclusion in prompts
+
+**Key Decisions:**
+- How to structure conversation state
+- Message history storage strategy (in-memory vs. persistent)
+- UI framework/approach for Zed
+- Context injection into prompts
+
+**Tests to Add:**
+- Multi-turn conversation flow tests
+- Message history tests
+- Context extraction tests
+- Chat engine error handling tests
+- UI interaction tests
+
+**Deliverables:**
+- Functional chat panel in Zed
+- Real-time response streaming
+- Multi-turn conversation support
+- Conversation history and persistence
+- Code context integration
+- Full test coverage
+
+### Phase 4: Code Completions & Advanced Features 📋 OPTIONAL
+
+**Focus:** Add optional code completion feature and advanced chat features.
+
+**Components to Build:**
+1. **Completion Engine** (`src/completion/engine.rs`)
+   - Trigger logic (keyboard shortcuts)
+   - Context extraction for inline suggestions
+   - Response formatting for display
+   - Performance optimization
+
+2. **Advanced Chat Features**
+   - Custom system prompts
+   - Code refactoring suggestions
+   - Documentation generation
+   - Test generation
+   - Debugging assistance
+
+**Key Decisions:**
+- Completion trigger mechanism
+- Inline display formatting
+- Caching strategy for performance
+- Feature toggles for advanced options
+
+**Deliverables:**
+- Optional code completion feature
+- Advanced chat capabilities
+- Performance optimization
+- Full test coverage
+
+## Error Handling Strategy
+
+### Provider Errors
+
+Providers return `ProviderError` with variants for different failure modes:
+
+```rust
+pub enum ProviderError {
+    ApiError(String),      // API request/response failures
+    ConfigError(String),   // Configuration issues
+    NetworkError(String),  // Network connectivity
+    ParseError(String),    // Response parsing failures
+    NotAvailable(String),  // Provider unavailable
+}
 ```
 
-## Publishing to Registry
+**Handling:**
+- Log with context for debugging
+- Return user-friendly error messages
+- Implement fallback to secondary provider (future)
 
-When ready for publication:
+### Chat-Specific Error Handling
 
-1. Update version in `extension.toml` and `Cargo.toml`
-2. Update `CHANGELOG.md`
-3. Tag release: `git tag v0.1.0`
-4. Fork `zed-industries/extensions` repo
-5. Add as submodule in `extensions/` directory
-6. Update root `extensions.toml`
-7. Submit PR to official repository
+In Phase 3, chat engine should:
+- Catch provider errors gracefully
+- Display error messages to user
+- Offer retry option
+- Maintain conversation state on error
+- Log detailed error context
 
-See [Zed Publishing Guide](https://zed.dev/docs/extensions/developing-extensions.html#publishing-your-extension) for details.
+### Configuration Errors
 
-## Debugging
+In Phase 2.2:
+- Validate configuration at load time
+- Provide specific error messages
+- Suggest fixes for common issues
+- Fail fast if critical configuration is missing
 
-### Enable Verbose Logging
+## Performance Considerations
+
+### Streaming Optimization
+- Buffer tokens efficiently to avoid UI thrashing
+- Update UI at reasonable intervals (e.g., every 100ms)
+- Don't block on API calls (use async/await)
+
+### Memory Efficiency
+- Limit conversation history size (configurable)
+- Truncate old messages when limit exceeded
+- Use references and borrowing effectively
+- Profile with `cargo flamegraph` if issues arise
+
+### API Efficiency
+- Cache identical prompts (future)
+- Batch requests if applicable
+- Respect rate limiting
+- Implement request debouncing
+
+## Logging & Observability
+
+### Log Format
+
+All logs should include context:
+```rust
+println!("[Zed Copilot] Component: Message here");
+println!("[Chat] Sent message: {} tokens", token_count);
+println!("[Provider:openai] API response received: {} chars", len);
+```
+
+### Key Logging Points
+
+- Extension initialization
+- Configuration loading
+- Provider instantiation
+- API requests/responses (non-sensitive)
+- Error conditions with context
+- Chat events (user message, assistant response)
+
+### Debugging
+
+Enable detailed logging by running Zed in foreground:
 ```bash
 zed --foreground
 ```
 
-### View Extension Logs
-Use `zed: open log` command in Zed to inspect:
-- Extension initialization
-- API errors
-- Performance metrics
-
-### Debug Tests
-
-```bash
-# Run tests with output
-cargo test -- --nocapture
-
-# Run single test with output
-cargo test test_name -- --nocapture
-
-# Run tests in single-threaded mode
-cargo test -- --test-threads=1
+View logs with:
+```
+zed: open log
 ```
 
-See TESTING.md for more debugging tips.
+## Security Considerations
 
-### Common Issues & Solutions
+### Credential Handling
+- Never hardcode API keys
+- Use environment variable interpolation
+- Use Zed's secure storage APIs when available
+- Validate credentials before use
+- Clear credentials from memory appropriately
 
-**Extension doesn't load:**
-- Check for Rust compilation errors: `cargo build --release`
-- Verify `zed_extension_api` version compatibility
-- Check Zed version compatibility
+### Data Privacy
+- Don't log sensitive data (API keys, user code)
+- Implement user code sanitization if logging
+- Respect user privacy in error messages
+- Consider data retention for conversation history
 
-**Crashes on startup:**
-- Review Zed.log for panic messages
-- Simplify recent changes to isolate issue
-- Test with minimal code
-- Run `cargo test` to verify tests still pass
-
-**Performance degradation:**
-- Profile with `cargo flamegraph`
-- Check for blocking operations
-- Review memory usage
-- Run benchmarks if available
-
-**Tests failing:**
-- Run `cargo test -- --nocapture` to see output
-- Check TESTING.md for debugging strategies
-- Verify recent code changes don't break invariants
+### Input Validation
+- Validate all user input
+- Sanitize prompts before sending to API
+- Handle injection attacks in prompts
+- Validate API responses before processing
 
 ## Useful Resources
 
-- [ROADMAP.md](./ROADMAP.md) — Project roadmap and planned features
+- [ROADMAP.md](./ROADMAP.md) — Project roadmap and timelines
 - [TESTING.md](./TESTING.md) — Comprehensive testing guide
+- [PROVIDER_INTEGRATION.md](./PROVIDER_INTEGRATION.md) — Provider details
+- [DOCUMENTATION_REVIEW.md](./DOCUMENTATION_REVIEW.md) — Alignment review
+- [zed-rules/AGENTS.md](../zed-rules/AGENTS.md) — Coding guidelines
 - [Zed Extension API Docs](https://zed.dev/docs/extensions)
 - [Zed Extension Capabilities](https://zed.dev/docs/extensions/capabilities.html)
 - [Rust WebAssembly Book](https://rustwasm.github.io/book/)
-- [Rust Testing Documentation](https://doc.rust-lang.org/book/ch11-00-testing.html)
 - [Tokio Async Tutorial](https://tokio.rs/tokio/tutorial)
 - [OpenAI API Docs](https://platform.openai.com/docs)
 - [Anthropic Claude Docs](https://docs.anthropic.com/)
@@ -420,7 +615,9 @@ This project is MIT licensed. See LICENSE file for details.
 
 ---
 
-**Last Updated:** 2024
-**Current Version:** 0.0.1
-**Status:** Phase 1 - Foundation (Complete ✅ — Ready for Phase 2)
+**Last Updated:** November 2024
+**Current Version:** 0.0.1 (Phase 1 Complete ✅)
+**Current Phase:** 2.2 (Configuration & Credentials)
+**Primary Feature:** Chat Interface (Phase 3 - Coming Q2 2025)
+**Status:** Provider foundation complete, configuration system in progress
 **Maintainers:** Zed Copilot Contributors

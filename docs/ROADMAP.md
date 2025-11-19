@@ -2,7 +2,7 @@
 
 ## Overview
 
-Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension for Zed IDE. This roadmap outlines the planned features and milestones for bringing intelligent code completion and AI-assisted features to Zed.
+Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension for Zed IDE. This roadmap outlines the planned features and milestones for bringing an interactive AI chat assistant to Zed, with optional code completion features.
 
 ## Phase 1: Foundation (Current - v0.0.1) ✅
 
@@ -51,49 +51,94 @@ Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension f
 - [ ] Environment variable interpolation
 - [ ] Per-provider configuration support
 - [ ] Configuration validation and error handling
+- [ ] Chat-specific streaming configuration
+- [ ] Message persistence strategy
+
+**Goals:**
+- Enable users to configure API credentials securely
+- Support chat-ready configuration
+- Lay groundwork for Phase 3 chat interface
 
 ### Phase 2.3: HTTP Integration & Retry Logic
 - [ ] HTTP client implementation (reqwest)
 - [ ] Actual API request execution
 - [ ] Response parsing and validation
+- [ ] Streaming response support for chat
 - [ ] Retry logic with exponential backoff
 - [ ] Rate limiting support
 
-**Key Goals:**
+**Goals:**
+- Enable real API calls to AI providers
+- Support streaming responses for chat UX
+- Handle transient failures gracefully
+
+**Key Goals for Phase 2:**
 - Enable multiple AI provider support ✅ (Phase 2.1)
 - Secure credential management (Phase 2.2)
 - Robust error handling for API failures (Phase 2.3)
 - User-friendly configuration (Phase 2.2)
+- Streaming support for chat (Phase 2.3)
 
-## Phase 3: Code Completion (v0.2.0)
+## Phase 3: Chat Interface & Core Functionality (v0.2.0) 🎯 PRIMARY
 
 **Target:** Q2 2025
 
-- [ ] Completion trigger logic
-- [ ] Context extraction from buffer
-- [ ] Response formatting
-- [ ] Caching strategy
-- [ ] Performance optimization
+- [ ] Chat UI panel implementation in Zed
+- [ ] Message handling and display
+- [ ] User message input and submission
+- [ ] Multi-turn conversation management
+- [ ] Message history storage and retrieval
+- [ ] Streaming response rendering
+- [ ] Context awareness (file, cursor, selection)
+- [ ] Chat state management
+- [ ] Error handling and user feedback
+- [ ] Comprehensive chat tests
+
+**Deliverables:**
+- Interactive chat panel in Zed sidebar/panel
+- Full conversation flow (send message → stream response → update history)
+- Message history persistence (per session or global)
+- Chat-specific error messages and recovery
+- Streaming response display with real-time token updates
+- Context integration (code snippets, file context)
+- Configuration UI for API keys and provider selection
+- Full test coverage for chat functionality
 
 **Key Goals:**
-- Fast, responsive completions
-- Smart context gathering
-- High-quality suggestions
-- Memory-efficient operation
+- Intuitive chat interface for asking questions about code
+- Real-time response streaming for immediate feedback
+- Conversation history for context continuity
+- Seamless integration with Zed IDE
+- High-quality user experience
 
-## Phase 4: Advanced Features (v0.3.0+)
+## Phase 4: Code Completions & Advanced Features (v0.3.0+)
 
 **Target:** Q3 2025+
 
-- [ ] Multi-language support
-- [ ] Custom prompts
+### Code Completions (Optional)
+- [ ] Completion trigger logic (context-aware)
+- [ ] Context extraction from buffer
+- [ ] Response formatting for inline display
+- [ ] Caching strategy for repeated prompts
+- [ ] Performance optimization
+- [ ] Completion-specific tests
+
+**Goals:**
+- Fast, responsive inline completions
+- Smart context gathering
+- Optional feature (not core to chat experience)
+
+### Advanced Features
+- [ ] Multi-language support in chat
+- [ ] Custom system prompts
 - [ ] Code refactoring suggestions
-- [ ] Documentation generation
-- [ ] Test generation
+- [ ] Documentation generation from chat
+- [ ] Test generation from chat
 - [ ] Debugging assistance
+- [ ] Chat personas/modes (e.g., teacher, expert, etc.)
 
 **Key Goals:**
-- Expand beyond simple completions
+- Expand beyond basic chat
 - Support diverse workflows
 - Improve developer productivity
 - Enable advanced use cases
@@ -102,17 +147,50 @@ Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension f
 
 **Target:** Q4 2025
 
-- [ ] Comprehensive test coverage
+- [ ] Comprehensive test coverage (chat + completions)
 - [ ] Performance optimization
 - [ ] Security audit
 - [ ] Official documentation
+- [ ] User guide and tutorials
 - [ ] Publish to Zed extension registry
+- [ ] Community support infrastructure
 
 **Key Goals:**
 - Production-ready quality
 - Broad compatibility
 - User-friendly experience
-- Official support
+- Official support and maintenance
+
+## Architecture Overview
+
+### Core Components (Phase 2 + 3)
+
+```
+┌─────────────────────────────────────────────────┐
+│           Zed IDE (Host)                        │
+├─────────────────────────────────────────────────┤
+│  Zed Copilot Extension (WebAssembly)            │
+│  ┌──────────────────────────────────────────┐   │
+│  │ ZedCopilot (Extension)                   │   │
+│  ├── Chat UI Panel                          │   │
+│  ├── Chat Engine                            │   │
+│  ├── Message History Manager                │   │
+│  ├── Streaming Response Handler             │   │
+│  ├── AI Provider Manager                    │   │
+│  ├── Configuration Manager                  │   │
+│  └── Context Manager                        │   │
+│  ├── Logger/Telemetry                       │   │
+│  └── (Future: Completion Engine)            │   │
+│  └──────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
+         ↓
+┌─────────────────────────────────────────────────┐
+│  External AI Providers                          │
+│  ├── OpenAI API (GPT-4, GPT-3.5-turbo)         │
+│  ├── Anthropic Claude API (Claude 3 family)    │
+│  └── Future: Ollama, other LLMs                │
+└─────────────────────────────────────────────────┘
+```
 
 ## API Integration Strategy
 
@@ -150,14 +228,9 @@ This design enables:
 - Type-safe error handling via `ProviderResult<T>`
 - Thread-safe execution with `Send + Sync` bounds
 
-**Implementation Status:**
-- ✅ Trait fully defined with 4 methods
-- ✅ OpenAI provider with GPT-4 and GPT-3.5-turbo support
-- ✅ Anthropic provider with Claude 3 family support
-- ✅ Custom API base URL support for both providers
-- ✅ Request payload building (ready for HTTP implementation)
+**Note:** Phase 2.3 will extend this to support streaming responses for chat.
 
-### Configuration (Planned)
+### Configuration (Phase 2.2 - Planned)
 
 Users will configure providers in Zed settings via JSON:
 
@@ -168,11 +241,18 @@ Users will configure providers in Zed settings via JSON:
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4"
+      "model": "gpt-4",
+      "api_base": "https://api.openai.com/v1"
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet"
+      "model": "claude-3-sonnet",
+      "api_base": "https://api.anthropic.com/v1"
+    },
+    "chat": {
+      "streaming_enabled": true,
+      "max_history_messages": 50,
+      "auto_scroll_to_latest": true
     }
   }
 }
@@ -188,21 +268,21 @@ Users will configure providers in Zed settings via JSON:
 
 #### OpenAI ✅ (Complete - Phase 2.1)
 - Models: GPT-4, GPT-3.5-turbo
-- Capabilities: Text completion, code generation
+- Capabilities: Chat, code generation, analysis
 - Status: Implemented and tested
 - Features: Custom API base URL support, request payload building
 
 #### Anthropic Claude ✅ (Complete - Phase 2.1)
 - Models: Claude 3 (Opus, Sonnet, Haiku)
-- Capabilities: Text completion, code analysis
+- Capabilities: Chat, code analysis, conversations
 - Status: Implemented and tested
 - Features: Custom API base URL support, request payload building
 
-#### Future Providers (Planned)
-- Local models via Ollama (Phase 2.4+)
-- Self-hosted LLM services (Phase 2.4+)
+#### Future Providers (Planned for Phase 2.4+)
+- Local models via Ollama
+- Self-hosted LLM services
 - Additional commercial providers (Cohere, Mistral, etc.)
-- Streaming response support (Phase 4+)
+- Custom/fine-tuned models
 
 ## Implementation Priorities
 
@@ -211,34 +291,45 @@ Users will configure providers in Zed settings via JSON:
 2. ✅ AI provider interface abstraction (Phase 2.1 - Complete)
 3. ✅ OpenAI and Anthropic implementations (Phase 2.1 - Complete)
 4. **Phase 2.2 (Next):** Configuration and credential management
-5. **Phase 2.3 (After 2.2):** HTTP integration and retry logic
+5. **Phase 2.3 (After 2.2):** HTTP integration and streaming support
 
 ### Near-term (Phase 2.2-2.3)
 1. API key management and secure storage
-2. Provider configuration system
+2. Provider configuration system (chat-focused)
 3. Environment variable interpolation
-4. HTTP client implementation (reqwest)
+4. HTTP client implementation (reqwest with streaming)
 5. Retry logic with exponential backoff
+6. Streaming response support for chat
 
-### Medium-term (Phase 3)
-1. Completion trigger logic and context extraction
-2. Response formatting and caching
-3. Performance optimization and benchmarking
-4. Memory efficiency improvements
+### Medium-term (Phase 3 - PRIMARY FOCUS)
+1. Chat UI panel and message display
+2. Multi-turn conversation management
+3. Message history storage and retrieval
+4. Streaming response rendering
+5. User input handling and submission
+6. Context awareness (file, cursor, selection)
+7. Error handling and user feedback
 
 ### Long-term (Phases 4-5)
-1. Advanced features (refactoring, test generation, docs)
-2. Multi-language support
-3. Custom prompts and workflows
-4. Security audit and official publication
+1. Code completion feature (optional)
+2. Advanced features (refactoring, test generation, docs)
+3. Multi-language support
+4. Custom prompts and workflows
+5. Security audit and official publication
 
 ## Success Metrics
 
-- **Quality:** All tests passing, zero warnings
-- **Performance:** Completions under 2 seconds
-- **Stability:** Less than 0.1% error rate
+### Phase 3 (Chat) - Primary Goals
+- **Quality:** Chat tests at 90%+ coverage
+- **UX:** Users can conduct multi-turn conversations
+- **Performance:** Response streaming starts within 1 second
+- **Stability:** Less than 0.1% error rate in chat operations
+- **Reliability:** Chat state persists across sessions
+
+### Overall
 - **Adoption:** Published to Zed registry
 - **Community:** Active contributor base
+- **Support:** Comprehensive documentation and tutorials
 
 ## Breaking Changes
 
@@ -247,6 +338,11 @@ This roadmap may be adjusted based on:
 - Community feedback
 - Technical discoveries
 - Resource constraints
+
+**Recent Change (November 2024):**
+- **MAJOR:** Repositioned chat as Phase 3 (primary feature)
+- Code completions moved to Phase 4 (optional feature)
+- Rationale: Chat is the primary user-facing feature; completions are secondary
 
 Updates will be communicated via:
 - GitHub issues
@@ -257,12 +353,16 @@ Updates will be communicated via:
 ## Related Documentation
 
 - [DEVELOPMENT.md](./DEVELOPMENT.md) — Development workflow and architecture
+- [DOCUMENTATION_REVIEW.md](./DOCUMENTATION_REVIEW.md) — Alignment review and gaps
+- [CHAT_ARCHITECTURE.md](./CHAT_ARCHITECTURE.md) — Chat design and implementation (Phase 3)
 - [TESTING.md](./TESTING.md) — Testing strategies and guidelines
+- [PROVIDER_INTEGRATION.md](./PROVIDER_INTEGRATION.md) — AI provider details
 - [CHANGELOG.md](../CHANGELOG.md) — Version history and changes
 
 ---
 
-**Last Updated:** November 20, 2024
+**Last Updated:** November 2024
 **Current Phase:** 2 (AI Provider Integration) — Phase 2.1 Complete
 **Next Phase:** 2.2 (Configuration & Credentials)
+**Primary Feature:** Chat Interface (Phase 3)
 **Status:** On Track — 40/40 Tests Passing ✅
