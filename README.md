@@ -59,10 +59,14 @@ zed-copilot/
 ├── Cargo.toml              # Rust project configuration
 ├── src/
 │   └── lib.rs              # Main extension implementation
+├── docs/
+│   ├── DEVELOPMENT.md      # Development guide and architecture
+│   ├── CHANGELOG.md        # Version history
+│   ├── SETUP.md            # Setup instructions
+│   ├── QUICKSTART.md       # Quick start guide
+│   └── EXECUTION_SUMMARY.md # Execution summary
 ├── README.md               # This file
-├── DEVELOPMENT.md          # Development guide and architecture
 ├── LICENSE                 # MIT License
-├── CHANGELOG.md            # Version history
 └── .gitignore              # Git ignore rules
 ```
 
@@ -151,7 +155,7 @@ Currently, Zed Copilot has minimal configuration. Future versions will support:
 - Feature toggles
 - Custom prompts and behaviors
 
-See `DEVELOPMENT.md` for planned features and architecture.
+See `docs/DEVELOPMENT.md` for planned features and architecture.
 
 ## Contributing
 
@@ -170,8 +174,10 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## Documentation
 
-- [DEVELOPMENT.md](DEVELOPMENT.md) - Architecture, planned features, and development guidelines
-- [CHANGELOG.md](CHANGELOG.md) - Version history and release notes
+- [DEVELOPMENT.md](docs/DEVELOPMENT.md) - Architecture, planned features, and development guidelines
+- [CHANGELOG.md](docs/CHANGELOG.md) - Version history and release notes
+- [SETUP.md](docs/SETUP.md) - Setup and installation instructions
+- [QUICKSTART.md](docs/QUICKSTART.md) - Quick start guide
 - [Zed Extension Docs](https://zed.dev/docs/extensions) - Official Zed extension documentation
 
 ## Support
