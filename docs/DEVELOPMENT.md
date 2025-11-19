@@ -103,6 +103,31 @@ zed-copilot/
 
 ### Running Checks
 
+Use the Makefile for convenient command shortcuts:
+
+```bash
+# Run all quality checks (fmt, clippy, test)
+make check-all
+
+# Individual checks
+make fmt          # Format code with rustfmt
+make clippy       # Lint code with clippy
+make test         # Run all tests
+
+# Specific test suites
+make test-lib     # Unit tests only
+make test-int     # Integration tests only
+
+# Building
+make build        # Build debug binary
+make release      # Build optimized release binary
+
+# View all available commands
+make help
+```
+
+Or run cargo commands directly:
+
 ```bash
 # Format code
 cargo fmt
@@ -124,9 +149,6 @@ cargo test --test '*'
 
 # Check documentation
 cargo doc --no-deps --open
-
-# Full quality check
-cargo fmt && cargo clippy && cargo test
 ```
 
 ## Testing
@@ -178,6 +200,92 @@ fn test_my_feature() {
 
 See `docs/TESTING.md` for comprehensive testing guide with examples and best practices.
 
+## CI/CD Pipeline
+
+Zed Copilot uses GitHub Actions for automated testing, linting, and building. All pull requests and pushes to `main`/`develop` run through the CI pipeline.
+
+### Automated Checks
+
+The CI pipeline runs four independent jobs:
+
+1. **Test Suite** — Runs all unit and integration tests
+   - Command: `cargo test --lib` + `cargo test --test '*'`
+   - Must pass: All 14 tests must succeed
+
+2. **Formatting** — Checks code follows Rust conventions
+   - Command: `cargo fmt -- --check`
+   - Auto-fix locally: `cargo fmt`
+
+3. **Linting** — Checks for code warnings and anti-patterns
+   - Command: `cargo clippy -- -D warnings`
+   - Warnings treated as errors; code must be warning-free
+
+4. **Build** — Verifies WASM binary compiles successfully
+   - Builds for target: `wasm32-unknown-unknown`
+   - Verifies binary exists
+   - Checks size is under 1.5MB threshold
+   - Uploads artifact for inspection
+
+### Workflow Triggers
+
+CI runs automatically on:
+- Push to `main` or `develop` branches
+- All pull requests to `main` or `develop`
+- Manual trigger via GitHub Actions UI
+- Changes to: `src/`, `tests/`, `Cargo.toml`, `Cargo.lock`, `extension.toml`
+
+Documentation-only changes (`.md`, `docs/`, `LICENSE`) skip CI.
+
+### Running CI Locally
+
+To test your changes before pushing:
+
+```bash
+# Run all quality checks locally
+cargo fmt && cargo clippy && cargo test
+
+# Individual checks
+cargo fmt -- --check        # Check formatting
+cargo fmt                   # Auto-fix formatting
+cargo clippy                # Lint warnings
+cargo test                  # All tests
+cargo test --lib           # Unit tests only
+cargo test --test '*'      # Integration tests only
+cargo test -- --nocapture  # Show test output
+cargo test -- --test-threads=1  # Debug mode
+
+# Build WASM
+cargo build --release --target wasm32-unknown-unknown
+ls -lh target/wasm32-unknown-unknown/release/zed_copilot.wasm
+```
+
+### Using `act` to Simulate CI
+
+Install [act](https://github.com/nektos/act) to run workflows locally:
+
+```bash
+# macOS
+brew install act
+
+# Run entire CI pipeline
+act
+
+# Run specific job
+act -j test
+act -j build
+
+# Verbose output
+act -v
+```
+
+### Configuration Files
+
+- `.github/workflows/ci.yml` — Main CI pipeline definition
+- `.github/CONTRIBUTING.md` — Contribution guidelines with CI expectations
+- `.github/workflows/README.md` — Detailed workflow documentation
+
+See [Contributing Guide](.github/CONTRIBUTING.md) for detailed CI/CD expectations.
+
 ## Planned Features (Roadmap)
 
 ### Phase 1: Foundation (Current - v0.0.1)
@@ -185,7 +293,7 @@ See `docs/TESTING.md` for comprehensive testing guide with examples and best pra
 - [x] Zed extension registration
 - [x] Project documentation
 - [x] Unit test framework (14 tests, all passing)
-- [ ] CI/CD setup (GitHub Actions)
+- [x] CI/CD setup (GitHub Actions)
 
 ### Phase 2: AI Provider Integration (v0.1.0)
 - [ ] Abstract AI provider interface
@@ -422,5 +530,5 @@ This project is MIT licensed. See LICENSE file for details.
 
 **Last Updated:** 2024
 **Current Version:** 0.0.1
-**Status:** Phase 1 - Foundation (Unit Test Framework Complete ✅)
+**Status:** Phase 1 - Foundation (Complete ✅ — Ready for Phase 2)
 **Maintainers:** Zed Copilot Contributors

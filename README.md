@@ -1,5 +1,7 @@
 # Zed Copilot
 
+[![CI](https://github.com/yourusername/zed-copilot/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/zed-copilot/actions/workflows/ci.yml)
+
 AI-powered code completion and assistance for Zed IDE.
 
 ## Overview
@@ -70,7 +72,26 @@ zed-copilot/
 └── .gitignore              # Git ignore rules
 ```
 
-### Building
+### Building & Development Commands
+
+Use the Makefile for convenient shortcuts:
+
+```bash
+# Run all quality checks (format, lint, test)
+make check-all
+
+# Individual commands
+make fmt       # Format code with rustfmt
+make clippy    # Lint code with clippy
+make test      # Run all tests
+make build     # Build debug binary
+make release   # Build optimized release binary
+
+# View all available commands
+make help
+```
+
+Or use cargo directly:
 
 ```bash
 # Build the extension
@@ -92,6 +113,10 @@ This will display `println!` output and detailed logging from the extension.
 ### Running Tests
 
 ```bash
+# Run all tests
+make test
+
+# Or with cargo directly
 cargo test
 ```
 
