@@ -67,6 +67,7 @@ zed-copilot/
 │   └── integration_tests.rs # Integration tests
 ├── docs/
 │   ├── DEVELOPMENT.md       # This file
+│   ├── ROADMAP.md           # Project roadmap and planned features
 │   └── TESTING.md           # Comprehensive testing guide
 ├── README.md                # User guide
 ├── CHANGELOG.md             # Version history
@@ -286,116 +287,6 @@ act -v
 
 See [Contributing Guide](.github/CONTRIBUTING.md) for detailed CI/CD expectations.
 
-## Planned Features (Roadmap)
-
-### Phase 1: Foundation (Current - v0.0.1)
-- [x] Basic extension scaffolding
-- [x] Zed extension registration
-- [x] Project documentation
-- [x] Unit test framework (14 tests, all passing)
-- [x] CI/CD setup (GitHub Actions)
-
-### Phase 2: AI Provider Integration (v0.1.0)
-- [ ] Abstract AI provider interface
-- [ ] OpenAI API integration
-- [ ] Anthropic Claude integration
-- [ ] API key management
-- [ ] Provider configuration
-- [ ] Error handling and retries
-
-### Phase 3: Code Completion (v0.2.0)
-- [ ] Completion trigger logic
-- [ ] Context extraction from buffer
-- [ ] Response formatting
-- [ ] Caching strategy
-- [ ] Performance optimization
-
-### Phase 4: Advanced Features (v0.3.0+)
-- [ ] Multi-language support
-- [ ] Custom prompts
-- [ ] Code refactoring suggestions
-- [ ] Documentation generation
-- [ ] Test generation
-- [ ] Debugging assistance
-
-### Phase 5: Polish & Publishing (v1.0.0)
-- [ ] Comprehensive test coverage
-- [ ] Performance optimization
-- [ ] Security audit
-- [ ] Official documentation
-- [ ] Publish to Zed extension registry
-
-## API Integration Strategy
-
-### AI Provider Interface (Planned)
-
-```rust
-pub trait AiProvider {
-    async fn complete(&self, prompt: &str) -> Result<String>;
-    async fn is_available(&self) -> bool;
-    fn name(&self) -> &str;
-}
-
-pub struct OpenAiProvider {
-    api_key: String,
-    model: String,
-}
-
-pub struct AnthropicProvider {
-    api_key: String,
-    model: String,
-}
-```
-
-### Configuration (Planned)
-
-Users will configure providers in Zed settings:
-
-```json
-{
-  "zed_copilot": {
-    "enabled": true,
-    "provider": "openai",
-    "openai": {
-      "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4"
-    },
-    "anthropic": {
-      "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet"
-    }
-  }
-}
-```
-
-## Performance Considerations
-
-- **WASM Size**: Keep compiled binary under 1MB
-- **Startup Time**: Minimize initialization overhead
-- **Latency**: Cache common completions
-- **Memory**: Stream responses to avoid large buffers
-- **Network**: Implement request batching
-
-## Security Considerations
-
-- **API Keys**: Never hardcode keys; use environment variables
-- **Data Privacy**: Don't send user code without consent
-- **Network**: Use HTTPS for all API calls
-- **Validation**: Validate all external responses
-- **Dependencies**: Keep dependencies minimal and updated
-
-## Dependencies
-
-### Current
-- `zed_extension_api = "0.1"` - Zed extension API
-
-### Planned
-- `tokio` - Async runtime
-- `reqwest` - HTTP client
-- `serde`/`serde_json` - Serialization
-- `env_logger` - Logging
-- `thiserror` - Error handling
-
 ## Known Issues & Limitations
 
 ### v0.0.1
@@ -513,6 +404,7 @@ See TESTING.md for more debugging tips.
 
 ## Useful Resources
 
+- [ROADMAP.md](./ROADMAP.md) — Project roadmap and planned features
 - [TESTING.md](./TESTING.md) — Comprehensive testing guide
 - [Zed Extension API Docs](https://zed.dev/docs/extensions)
 - [Zed Extension Capabilities](https://zed.dev/docs/extensions/capabilities.html)
