@@ -47,7 +47,7 @@ Example (when available):
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4"
+      "model": "gpt-4o"
     }
   }
 }
@@ -64,7 +64,7 @@ Example (when available):
     "provider": "anthropic",
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet"
+      "model": "claude-opus-4-1-20250805"
     }
   }
 }

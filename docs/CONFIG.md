@@ -31,7 +31,7 @@ Add to your Zed `settings.json`:
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4",
+      "model": "gpt-4o",
       "api_base": "https://api.openai.com/v1",
       "timeout_secs": 30
     },
@@ -71,7 +71,7 @@ The extension will load your configuration on startup.
 {
   "openai": {
     "api_key": string,           // Required: OpenAI API key (use env var)
-    "model": string,             // Optional: default "gpt-4"
+    "model": string,             // Optional: default "gpt-4o"
     "api_base": string,          // Optional: default "https://api.openai.com/v1"
     "timeout_secs": number       // Optional: default 30
   }
@@ -79,9 +79,10 @@ The extension will load your configuration on startup.
 ```
 
 **Supported Models:**
-- `gpt-4` — Most capable, recommended
-- `gpt-4-turbo-preview` — Faster, cheaper
-- `gpt-3.5-turbo` — Fast and affordable
+- `gpt-4o` — Multimodal, most capable (recommended)
+- `o1` — Advanced reasoning for complex problems
+- `o3-mini` — Lightweight reasoning model
+- `gpt-4-turbo` — Previous generation (not recommended)
 
 **Example:**
 
@@ -92,7 +93,7 @@ The extension will load your configuration on startup.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4-turbo-preview",
+      "model": "gpt-4o",
       "api_base": "https://api.openai.com/v1",
       "timeout_secs": 60
     }
@@ -106,7 +107,7 @@ The extension will load your configuration on startup.
 {
   "anthropic": {
     "api_key": string,           // Required: Anthropic API key (use env var)
-    "model": string,             // Optional: default "claude-3-sonnet-20240229"
+    "model": string,             // Optional: default "claude-opus-4-1-20250805"
     "api_base": string,          // Optional: default "https://api.anthropic.com/v1"
     "timeout_secs": number       // Optional: default 30
   }
@@ -114,9 +115,9 @@ The extension will load your configuration on startup.
 ```
 
 **Supported Models:**
-- `claude-3-opus-20240229` — Most powerful, slowest
-- `claude-3-sonnet-20240229` — Balanced (recommended)
-- `claude-3-haiku-20240307` — Fastest, more affordable
+- `claude-opus-4-1-20250805` — Most powerful, for complex reasoning (recommended)
+- `claude-sonnet-4-20250514` — Balanced intelligence and speed
+- `claude-haiku-4-5-20251001` — Fastest, most affordable
 
 **Example:**
 
@@ -127,7 +128,7 @@ The extension will load your configuration on startup.
     "provider": "anthropic",
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet-20240229",
+      "model": "claude-opus-4-1-20250805",
       "api_base": "https://api.anthropic.com/v1",
       "timeout_secs": 30
     }
@@ -228,13 +229,13 @@ echo $OPENAI_API_KEY
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4",
+      "model": "gpt-4o",
       "api_base": "https://api.openai.com/v1",
       "timeout_secs": 30
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet-20240229",
+      "model": "claude-opus-4-1-20250805",
       "api_base": "https://api.anthropic.com/v1",
       "timeout_secs": 30
     },

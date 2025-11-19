@@ -16,7 +16,7 @@ Zed Copilot brings an interactive AI chat interface directly into Zed IDE. **Ask
 - 📚 **Conversation History** — Maintain context across multiple exchanges
 - 🔄 **Multi-turn Conversations** — Natural back-and-forth dialogue with AI
 - 📍 **Code Context Awareness** — Reference current file, cursor position, or selected code
-- 🤖 **Multiple AI Providers** — Choose between OpenAI (GPT-4, GPT-3.5) or Anthropic (Claude 3)
+- 🤖 **Multiple AI Providers** — Choose between OpenAI (GPT-4o, o1, o3-mini) or Anthropic (Claude Opus 4.1, Sonnet 4, Haiku 4.5)
 - 💾 **Session Persistence** — Chat history persists across editor sessions
 - ⚡ **Fast & Responsive** — Sub-second response latency with streaming updates
 
@@ -84,7 +84,7 @@ See [GH_COPILOT_LSP_INTEGRATION.md](docs/GH_COPILOT_LSP_INTEGRATION.md) for impl
        "provider": "openai",
        "openai": {
          "api_key": "${OPENAI_API_KEY}",
-         "model": "gpt-4"
+         "model": "gpt-4o"
        }
      }
    }
@@ -203,7 +203,7 @@ Look for `[Zed Copilot]` prefixed log messages.
 
 ### OpenAI ✅
 
-**Models:** GPT-4, GPT-3.5-turbo
+**Models:** GPT-4o, o1, o3-mini, gpt-4-turbo
 
 **Setup:**
 1. Get API key from https://platform.openai.com/api-keys
@@ -214,7 +214,7 @@ Look for `[Zed Copilot]` prefixed log messages.
 
 ### Anthropic Claude ✅
 
-**Models:** Claude 3 Opus, Sonnet, Haiku
+**Models:** Claude Opus 4.1, Sonnet 4, Haiku 4.5
 
 **Setup:**
 1. Get API key from https://console.anthropic.com/keys
@@ -263,12 +263,12 @@ Configuration is done via Zed's `settings.json`:
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4",
+      "model": "gpt-4o",
       "api_base": "https://api.openai.com/v1"
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet",
+      "model": "claude-opus-4-1-20250805",
       "api_base": "https://api.anthropic.com/v1"
     },
     "chat": {

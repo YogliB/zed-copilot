@@ -2,9 +2,9 @@
 
 Practical setup examples for common use cases.
 
-## Example 1: OpenAI with GPT-4 (Recommended)
+## Example 1: OpenAI with GPT-4o (Recommended)
 
-Most capable model, best for complex code analysis.
+Most capable multimodal model, best for complex code analysis and understanding images.
 
 ### Setup Steps
 
@@ -28,7 +28,7 @@ Most capable model, best for complex code analysis.
        "provider": "openai",
        "openai": {
          "api_key": "${OPENAI_API_KEY}",
-         "model": "gpt-4"
+         "model": "gpt-4o"
        }
      }
    }
@@ -36,9 +36,9 @@ Most capable model, best for complex code analysis.
 
 4. **Restart Zed**
 
-## Example 2: OpenAI with GPT-3.5-turbo (Fast & Cheap)
+## Example 2: OpenAI with o1 (Advanced Reasoning)
 
-Faster responses, lower cost. Good for simple tasks.
+Advanced reasoning model for complex problem-solving and deeply analytical tasks.
 
 ```json
 {
@@ -47,7 +47,7 @@ Faster responses, lower cost. Good for simple tasks.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-3.5-turbo"
+      "model": "o1"
     }
   }
 }
@@ -58,9 +58,26 @@ Set environment variable:
 export OPENAI_API_KEY="sk-proj-..."
 ```
 
-## Example 3: Anthropic Claude 3 Sonnet (Balanced)
+## Example 3: OpenAI with o3-mini (Lightweight Reasoning)
 
-Good balance of quality, speed, and cost. Recommended Claude option.
+Lightweight reasoning model that balances capability with speed and cost efficiency.
+
+```json
+{
+  "zed_copilot": {
+    "enabled": true,
+    "provider": "openai",
+    "openai": {
+      "api_key": "${OPENAI_API_KEY}",
+      "model": "o3-mini"
+    }
+  }
+}
+```
+
+## Example 4: Anthropic Claude Opus 4.1 (Most Powerful)
+
+Most capable Claude model. Best for complex reasoning and detailed analysis.
 
 ### Setup Steps
 
@@ -84,7 +101,7 @@ Good balance of quality, speed, and cost. Recommended Claude option.
        "provider": "anthropic",
        "anthropic": {
          "api_key": "${ANTHROPIC_API_KEY}",
-         "model": "claude-3-sonnet-20240229"
+         "model": "claude-opus-4-1-20250805"
        }
      }
    }
@@ -92,9 +109,9 @@ Good balance of quality, speed, and cost. Recommended Claude option.
 
 4. **Restart Zed**
 
-## Example 4: Anthropic Claude 3 Opus (Most Powerful)
+## Example 5: Anthropic Claude Sonnet 4 (Balanced)
 
-Most capable Claude model. Best for complex problems but slower and more expensive.
+Good balance of quality, speed, and cost. Recommended Claude option.
 
 ```json
 {
@@ -103,7 +120,7 @@ Most capable Claude model. Best for complex problems but slower and more expensi
     "provider": "anthropic",
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-opus-20240229"
+      "model": "claude-sonnet-4-20250514"
     }
   }
 }
@@ -114,9 +131,9 @@ Set environment variable:
 export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-## Example 5: Anthropic Claude 3 Haiku (Fast)
+## Example 6: Anthropic Claude Haiku 4.5 (Fast & Affordable)
 
-Fastest Claude model. Best for quick responses with simple tasks.
+Fastest Claude model. Best for quick responses with simple tasks and cost-sensitive applications.
 
 ```json
 {
@@ -125,13 +142,13 @@ Fastest Claude model. Best for quick responses with simple tasks.
     "provider": "anthropic",
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-haiku-20240307"
+      "model": "claude-haiku-4-5-20251001"
     }
   }
 }
 ```
 
-## Example 6: Custom Timeout (Slow Network)
+## Example 7: Custom Timeout (Slow Network)
 
 Increase timeout for slow or unstable internet connections.
 
@@ -142,14 +159,14 @@ Increase timeout for slow or unstable internet connections.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4",
+      "model": "gpt-4o",
       "timeout_secs": 60
     }
   }
 }
 ```
 
-## Example 7: Custom API Endpoint (Proxy/Self-Hosted)
+## Example 8: Custom API Endpoint (Proxy/Self-Hosted)
 
 Route requests through a custom endpoint.
 
@@ -160,14 +177,14 @@ Route requests through a custom endpoint.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4",
+      "model": "gpt-4o",
       "api_base": "https://custom-proxy.example.com/v1"
     }
   }
 }
 ```
 
-## Example 8: Multiple Providers (Easy Switching)
+## Example 9: Multiple Providers (Easy Switching)
 
 Configure both providers, switch between them by changing `provider` field.
 
@@ -178,11 +195,11 @@ Configure both providers, switch between them by changing `provider` field.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4"
+      "model": "gpt-4o"
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet-20240229"
+      "model": "claude-opus-4-1-20250805"
     }
   }
 }
@@ -195,7 +212,7 @@ To switch to Anthropic, change:
 
 Then restart Zed.
 
-## Example 9: Optimized Chat Settings (Large History)
+## Example 10: Optimized Chat Settings (Large History)
 
 Keep more messages in history, increase context window.
 
@@ -206,7 +223,7 @@ Keep more messages in history, increase context window.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4"
+      "model": "gpt-4o"
     },
     "chat": {
       "streaming_enabled": true,
@@ -218,7 +235,7 @@ Keep more messages in history, increase context window.
 }
 ```
 
-## Example 10: No Streaming (Stable Connection Issues)
+## Example 11: No Streaming (Stable Connection Issues)
 
 Disable streaming if you experience connection issues.
 
@@ -229,7 +246,7 @@ Disable streaming if you experience connection issues.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4"
+      "model": "gpt-4o"
     },
     "chat": {
       "streaming_enabled": false,
@@ -241,7 +258,7 @@ Disable streaming if you experience connection issues.
 
 Responses will load as complete blocks instead of streaming tokens.
 
-## Example 11: Minimal Configuration (All Defaults)
+## Example 12: Minimal Configuration (All Defaults)
 
 Use all defaults except API key.
 
@@ -258,13 +275,13 @@ Use all defaults except API key.
 ```
 
 This uses:
-- Model: `gpt-4` (OpenAI default)
+- Model: `gpt-4o` (OpenAI default)
 - Timeout: `30` seconds
 - Chat streaming: enabled
 - History: 50 messages
 - Context: 4096 tokens
 
-## Example 12: Complete Production Config
+## Example 13: Complete Production Config
 
 Full-featured setup for production use.
 
@@ -275,13 +292,13 @@ Full-featured setup for production use.
     "provider": "openai",
     "openai": {
       "api_key": "${OPENAI_API_KEY}",
-      "model": "gpt-4",
+      "model": "gpt-4o",
       "api_base": "https://api.openai.com/v1",
       "timeout_secs": 45
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet-20240229",
+      "model": "claude-opus-4-1-20250805",
       "api_base": "https://api.anthropic.com/v1",
       "timeout_secs": 45
     },
@@ -398,7 +415,7 @@ echo $OPENAI_API_KEY
 {
   "openai": {
     "api_key": "${OPENAI_API_KEY}",
-    "model": "gpt-4"
+    "model": "gpt-4o"
   }
 }
 ```
@@ -409,7 +426,7 @@ Make sure:
 3. Environment variable is set
 4. JSON syntax is valid
 
-### "Invalid provider 'gpt-4'"
+### "Invalid provider 'gpt-4o'"
 
 **Problem:** Using model name instead of provider name.
 
@@ -419,7 +436,7 @@ Make sure:
   "provider": "openai",
   "openai": {
     "api_key": "${OPENAI_API_KEY}",
-    "model": "gpt-4"
+    "model": "gpt-4o"
   }
 }
 ```
@@ -429,35 +446,41 @@ Make sure:
 
 ## Comparison: When to Use What?
 
-### Use OpenAI GPT-4
-- **Best for:** Complex code analysis, detailed explanations
-- **Cost:** Higher
-- **Speed:** Slower (but worth it for quality)
-- **Use case:** Architecture reviews, difficult problems
-
-### Use OpenAI GPT-3.5-turbo
-- **Best for:** General coding tasks, quick answers
-- **Cost:** Lower
+### Use OpenAI GPT-4o
+- **Best for:** Complex code analysis, multimodal understanding, general purpose
+- **Cost:** Moderate
 - **Speed:** Fast
-- **Use case:** Quick refactoring, simple questions
-
-### Use Claude Opus
-- **Best for:** Complex analysis, long conversations
-- **Cost:** Higher
-- **Speed:** Slower
-- **Use case:** Research, detailed documentation
-
-### Use Claude Sonnet
-- **Best for:** Balanced speed and quality
-- **Cost:** Medium
-- **Speed:** Medium
 - **Use case:** Day-to-day coding (recommended)
 
-### Use Claude Haiku
+### Use OpenAI o1
+- **Best for:** Complex reasoning, advanced problem-solving
+- **Cost:** Higher
+- **Speed:** Slower (more thinking time)
+- **Use case:** Difficult algorithms, architecture decisions
+
+### Use OpenAI o3-mini
+- **Best for:** Lightweight reasoning, quick analysis with some reasoning capability
+- **Cost:** Lower than o1
+- **Speed:** Faster than o1
+- **Use case:** Moderate complexity tasks
+
+### Use Claude Opus 4.1
+- **Best for:** Complex analysis, long conversations, detailed reasoning
+- **Cost:** Higher
+- **Speed:** Medium
+- **Use case:** Research, detailed documentation, complex refactoring
+
+### Use Claude Sonnet 4
+- **Best for:** Balanced speed and quality
+- **Cost:** Medium
+- **Speed:** Fast
+- **Use case:** General coding tasks (recommended for Claude users)
+
+### Use Claude Haiku 4.5
 - **Best for:** Quick responses, simple tasks
 - **Cost:** Lowest
 - **Speed:** Fastest
-- **Use case:** Quick inline assistance
+- **Use case:** Quick inline assistance, cost-sensitive deployments
 
 ## Getting Started Checklist
 

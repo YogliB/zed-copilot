@@ -27,8 +27,8 @@ Zed Copilot is a WebAssembly-based AI extension for Zed IDE built in Rust. **Cha
          ↓
 ┌─────────────────────────────────────────────────┐
 │  External AI Providers                          │
-│  ├── OpenAI API (GPT-4, GPT-3.5-turbo) ✅      │
-│  ├── Anthropic Claude (Claude 3 family) ✅     │
+│  ├── OpenAI API (GPT-4o, o1, o3-mini) ✅      │
+│  ├── Anthropic Claude (Claude Opus 4.1, Sonnet 4, Haiku 4.5) ✅     │
 │  └── Future: Ollama, self-hosted, others        │
 └─────────────────────────────────────────────────┘
 ```
@@ -83,8 +83,8 @@ zed-copilot/
 
 **Delivered:**
 - Trait-based `AiProvider` interface supporting multiple providers
-- `OpenAiProvider` with GPT-4 and GPT-3.5-turbo support
-- `AnthropicProvider` with Claude 3 family support
+- `OpenAiProvider` with GPT-4o, o1, and o3-mini support
+- `AnthropicProvider` with Claude Opus 4.1, Sonnet 4, and Haiku 4.5 support
 - `ProviderFactory` for convenient instantiation
 - Error handling with `ProviderError` enum
 - 31 unit tests with 100% pass rate
@@ -301,7 +301,7 @@ fn test_my_config() {
         "provider": "openai",
         "openai": {
             "api_key": "test_key",
-            "model": "gpt-4"
+            "model": "gpt-4o"
         }
     }
     "#;

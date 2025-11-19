@@ -37,8 +37,8 @@ Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension f
 
 **Deliverables:**
 - Trait-based `AiProvider` interface
-- `OpenAiProvider` with GPT-4 and GPT-3.5-turbo support
-- `AnthropicProvider` with Claude 3 family support
+- `OpenAiProvider` with GPT-4o, o1, and o3-mini support
+- `AnthropicProvider` with Claude Opus 4.1, Sonnet 4, and Haiku 4.5 support
 - `ProviderFactory` for provider instantiation
 - `ProviderError` enum with 5 error variants
 - Full async/await support via `async-trait`
@@ -221,8 +221,8 @@ Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension f
          ↓                              ↓
 ┌─────────────────────────────────────────────────┐
 │  External AI Providers & Services               │
-│  ├── OpenAI API (GPT-4, GPT-3.5-turbo)         │
-│  ├── Anthropic Claude API (Claude 3 family)    │
+│  ├── OpenAI API (GPT-4o, o1, o3-mini)          │
+│  ├── Anthropic Claude API (Claude Opus 4.1, Sonnet 4, Haiku 4.5) │
 │  ├── GitHub Copilot LSP Server ⭐ (Phase 4)    │
 │  │   └── GitHub Authentication & API          │
 │  └── Future: Ollama, other LLMs                │
@@ -285,7 +285,7 @@ Users will configure providers in Zed settings via JSON:
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet",
+      "model": "claude-sonnet-4-20250514",
       "api_base": "https://api.anthropic.com/v1"
     },
     "chat": {
@@ -306,8 +306,8 @@ Users will configure providers in Zed settings via JSON:
 ### Supported Providers
 
 #### OpenAI ✅ (Complete - Phase 2.1)
-- Models: GPT-4, GPT-3.5-turbo
-- Capabilities: Chat, code generation, analysis
+- Models: GPT-4o, o1, o3-mini
+- Capabilities: Chat, code generation, analysis, reasoning
 - Status: Implemented and tested
 - Features: Custom API base URL support, request payload building
 

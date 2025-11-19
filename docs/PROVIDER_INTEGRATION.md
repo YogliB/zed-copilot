@@ -45,7 +45,7 @@ pub enum ProviderError {
 
 ### OpenAI
 
-**Models:** `gpt-4`, `gpt-3.5-turbo`
+**Models:** `gpt-4o`, `o1`, `o3-mini`
 
 **Features:**
 - Chat completions API
@@ -78,7 +78,7 @@ let provider = ProviderFactory::create_openai_with_base(
 
 ### Anthropic Claude
 
-**Models:** `claude-3-opus`, `claude-3-sonnet`, `claude-3-haiku`
+**Models:** `claude-opus-4-1-20250805`, `claude-sonnet-4-20250514`, `claude-haiku-4-5-20251001`
 
 **Features:**
 - Messages API
@@ -92,7 +92,7 @@ use zed_copilot::providers::ProviderFactory;
 
 let provider = ProviderFactory::create_anthropic(
     "sk-ant-...".to_string(),
-    "claude-3-sonnet".to_string()
+    "claude-sonnet-4-20250514".to_string()
 )?;
 
 let result = provider.complete("Explain async/await in Rust").await?;
@@ -104,7 +104,7 @@ println!("{}", result);
 ```rust
 let provider = ProviderFactory::create_anthropic_with_base(
     "sk-ant-...".to_string(),
-    "claude-3-sonnet".to_string(),
+    "claude-sonnet-4-20250514".to_string(),
     "https://custom.anthropic.com/v1".to_string()
 )?;
 ```
@@ -240,7 +240,7 @@ pub fn create_yourprovider(
 **Request:**
 ```json
 {
-  "model": "claude-3-sonnet",
+  "model": "claude-sonnet-4-20250514",
   "messages": [
     {
       "role": "user",
@@ -280,8 +280,8 @@ match provider.complete("prompt").await {
 ### Provider Fallback
 
 ```rust
-let primary = ProviderFactory::create_openai(openai_key, "gpt-4")?;
-let fallback = ProviderFactory::create_anthropic(anthropic_key, "claude-3-sonnet")?;
+let primary = ProviderFactory::create_openai(openai_key, "gpt-4o")?;
+let fallback = ProviderFactory::create_anthropic(anthropic_key, "claude-sonnet-4-20250514")?;
 
 let result = match primary.complete(prompt).await {
     Ok(response) => response,
@@ -315,7 +315,7 @@ Providers will be configured in Zed settings:
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-3-sonnet",
+      "model": "claude-sonnet-4-20250514",
       "api_base": "https://api.anthropic.com/v1"
     }
   }
