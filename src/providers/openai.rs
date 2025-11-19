@@ -1,10 +1,12 @@
 use crate::providers::error::{ProviderError, ProviderResult};
 use crate::providers::trait_def::AiProvider;
+use crate::http::openai::OpenAiHttpClient;
 
 pub struct OpenAiProvider {
     api_key: String,
     model: String,
     api_base: String,
+    http_client: OpenAiHttpClient,
 }
 
 impl OpenAiProvider {
@@ -21,30 +23,21 @@ impl OpenAiProvider {
             ));
         }
 
+        let api_base = "https://api.openai.com/v1".to_string();
+        let http_client = OpenAiHttpClient::new(api_base.clone())?;
+
         Ok(OpenAiProvider {
             api_key,
             model,
-            api_base: "https://api.openai.com/v1".to_string(),
+            api_base,
+            http_client,
         })
     }
 
-    pub fn with_api_base(mut self, api_base: String) -> Self {
-        self.api_base = api_base;
-        self
-    }
-
-    fn build_request_payload(&self, prompt: &str) -> serde_json::Value {
-        serde_json::json!({
-            "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "temperature": 0.7,
-            "max_tokens": 1024
-        })
+    pub fn with_api_base(mut self, api_base: String) -> ProviderResult<Self> {
+        self.api_base = api_base.clone();
+        self.http_client = OpenAiHttpClient::new(api_base)?;
+        Ok(self)
     }
 }
 
@@ -57,11 +50,7 @@ impl AiProvider for OpenAiProvider {
             ));
         }
 
-        let _payload = self.build_request_payload(prompt);
-
-        Err(ProviderError::ApiError(
-            "HTTP client not yet implemented".to_string(),
-        ))
+        self.http_client.complete(prompt, &self.model, &self.api_key).await
     }
 
     async fn is_available(&self) -> bool {
@@ -129,7 +118,8 @@ mod tests {
             "gpt-4".to_string(),
         )
         .unwrap()
-        .with_api_base("https://custom.openai.com/v1".to_string());
+        .with_api_base("https://custom.openai.com/v1".to_string())
+        .unwrap();
         assert_eq!(provider.api_base, "https://custom.openai.com/v1");
     }
 
@@ -152,17 +142,5 @@ mod tests {
         .unwrap();
         let result = provider.complete("").await;
         assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_openai_build_request_payload() {
-        let provider = OpenAiProvider::new(
-            "sk-test-key".to_string(),
-            "gpt-4".to_string(),
-        )
-        .unwrap();
-        let payload = provider.build_request_payload("test prompt");
-        assert_eq!(payload["model"], "gpt-4");
-        assert_eq!(payload["messages"][0]["content"], "test prompt");
     }
 }

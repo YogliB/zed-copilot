@@ -25,7 +25,7 @@ impl ProviderFactory {
         api_base: String,
     ) -> ProviderResult<Box<dyn AiProvider>> {
         let provider = OpenAiProvider::new(api_key, model)?
-            .with_api_base(api_base);
+            .with_api_base(api_base)?;
         Ok(Box::new(provider))
     }
 
@@ -35,7 +35,7 @@ impl ProviderFactory {
         api_base: String,
     ) -> ProviderResult<Box<dyn AiProvider>> {
         let provider = AnthropicProvider::new(api_key, model)?
-            .with_api_base(api_base);
+            .with_api_base(api_base)?;
         Ok(Box::new(provider))
     }
 }

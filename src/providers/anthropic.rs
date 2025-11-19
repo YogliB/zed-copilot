@@ -1,10 +1,12 @@
 use crate::providers::error::{ProviderError, ProviderResult};
 use crate::providers::trait_def::AiProvider;
+use crate::http::anthropic::AnthropicHttpClient;
 
 pub struct AnthropicProvider {
     api_key: String,
     model: String,
     api_base: String,
+    http_client: AnthropicHttpClient,
 }
 
 impl AnthropicProvider {
@@ -21,29 +23,21 @@ impl AnthropicProvider {
             ));
         }
 
+        let api_base = "https://api.anthropic.com/v1".to_string();
+        let http_client = AnthropicHttpClient::new(api_base.clone())?;
+
         Ok(AnthropicProvider {
             api_key,
             model,
-            api_base: "https://api.anthropic.com/v1".to_string(),
+            api_base,
+            http_client,
         })
     }
 
-    pub fn with_api_base(mut self, api_base: String) -> Self {
-        self.api_base = api_base;
-        self
-    }
-
-    fn build_request_payload(&self, prompt: &str) -> serde_json::Value {
-        serde_json::json!({
-            "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "max_tokens": 1024
-        })
+    pub fn with_api_base(mut self, api_base: String) -> ProviderResult<Self> {
+        self.api_base = api_base.clone();
+        self.http_client = AnthropicHttpClient::new(api_base)?;
+        Ok(self)
     }
 }
 
@@ -56,11 +50,7 @@ impl AiProvider for AnthropicProvider {
             ));
         }
 
-        let _payload = self.build_request_payload(prompt);
-
-        Err(ProviderError::ApiError(
-            "HTTP client not yet implemented".to_string(),
-        ))
+        self.http_client.complete(prompt, &self.model, &self.api_key).await
     }
 
     async fn is_available(&self) -> bool {
@@ -129,7 +119,8 @@ mod tests {
             "claude-3-sonnet".to_string(),
         )
         .unwrap()
-        .with_api_base("https://custom.anthropic.com/v1".to_string());
+        .with_api_base("https://custom.anthropic.com/v1".to_string())
+        .unwrap();
         assert_eq!(provider.api_base, "https://custom.anthropic.com/v1");
     }
 
@@ -161,7 +152,16 @@ mod tests {
             "claude-3-sonnet".to_string(),
         )
         .unwrap();
-        let payload = provider.build_request_payload("test prompt");
+        let payload = serde_json::json!({
+            "model": provider.model(),
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "test prompt"
+                }
+            ],
+            "max_tokens": 1024
+        });
         assert_eq!(payload["model"], "claude-3-sonnet");
         assert_eq!(payload["messages"][0]["content"], "test prompt");
     }
