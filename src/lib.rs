@@ -1,5 +1,6 @@
 use zed_extension_api as zed;
 
+pub mod config;
 pub mod providers;
 
 pub struct ZedCopilot;

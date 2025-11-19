@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Zed Copilot Configuration Schema",
+  "description": "Configuration schema for Zed Copilot AI assistant extension",
+  "type": "object",
+  "properties": {
+    "zed_copilot": {
+      "type": "object",
+      "description": "Zed Copilot extension configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable or disable the Zed Copilot extension"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["openai", "anthropic"],
+          "description": "Active AI provider: 'openai' for OpenAI GPT models, 'anthropic' for Claude models"
+        },
+        "openai": {
+          "type": "object",
+          "description": "OpenAI provider configuration",
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "description": "OpenAI API key. Use environment variable: ${OPENAI_API_KEY}",
+              "examples": ["${OPENAI_API_KEY}", "sk-proj-..."]
+            },
+            "model": {
+              "type": "string",
+              "default": "gpt-4",
+              "enum": ["gpt-4", "gpt-4-turbo-preview", "gpt-3.5-turbo"],
+              "description": "OpenAI model to use. gpt-4 recommended for best quality"
+            },
+            "api_base": {
+              "type": "string",
+              "default": "https://api.openai.com/v1",
+              "description": "OpenAI API base URL. Change for custom endpoints or proxies"
+            },
+            "timeout_secs": {
+              "type": "integer",
+              "default": 30,
+              "minimum": 1,
+              "description": "Request timeout in seconds"
+            }
+          },
+          "required": ["api_key"],
+          "additionalProperties": false
+        },
+        "anthropic": {
+          "type": "object",
+          "description": "Anthropic Claude provider configuration",
+          "properties": {
+            "api_key": {
+              "type": "string",
+              "description": "Anthropic API key. Use environment variable: ${ANTHROPIC_API_KEY}",
+              "examples": ["${ANTHROPIC_API_KEY}", "sk-ant-..."]
+            },
+            "model": {
+              "type": "string",
+              "default": "claude-3-sonnet-20240229",
+              "enum": [
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307"
+              ],
+              "description": "Claude model to use. Sonnet recommended for balance of quality and speed"
+            },
+            "api_base": {
+              "type": "string",
+              "default": "https://api.anthropic.com/v1",
+              "description": "Anthropic API base URL. Change for custom endpoints or proxies"
+            },
+            "timeout_secs": {
+              "type": "integer",
+              "default": 30,
+              "minimum": 1,
+              "description": "Request timeout in seconds"
+            }
+          },
+          "required": ["api_key"],
+          "additionalProperties": false
+        },
+        "chat": {
+          "type": "object",
+          "description": "Chat interface configuration",
+          "properties": {
+            "streaming_enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable real-time token streaming in chat responses"
+            },
+            "max_history_messages": {
+              "type": "integer",
+              "default": 50,
+              "minimum": 1,
+              "description": "Maximum number of messages to keep in conversation history"
+            },
+            "auto_scroll_to_latest": {
+              "type": "boolean",
+              "default": true,
+              "description": "Automatically scroll chat panel to the latest message"
+            },
+            "context_window_size": {
+              "type": "integer",
+              "default": 4096,
+              "minimum": 1,
+              "description": "Maximum token context window size for conversation context"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": ["provider"],
+      "additionalProperties": false
+    }
+  }
+}
