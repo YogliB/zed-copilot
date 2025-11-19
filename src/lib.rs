@@ -1,5 +1,7 @@
 use zed_extension_api as zed;
 
+pub mod providers;
+
 pub struct ZedCopilot;
 
 impl ZedCopilot {

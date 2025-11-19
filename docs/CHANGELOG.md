@@ -8,14 +8,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- AI provider abstraction layer
-- OpenAI integration
-- Anthropic Claude integration
 - Code completion engine
 - Context extraction system
-- Configuration management
-- API key handling
+- Configuration management (Phase 2.2)
+- API key handling (Phase 2.3)
+- Retry logic and rate limiting
+- Request caching strategy
 - Performance optimizations
+
+## [0.1.0-alpha] - 2024-11-20
+
+### Added
+- Abstract `AiProvider` trait for multi-provider support
+- `OpenAiProvider` implementation with GPT-4 and GPT-3.5-turbo support
+- `AnthropicProvider` implementation with Claude 3 family support
+- `ProviderFactory` for convenient provider instantiation
+- Comprehensive error handling with `ProviderError` enum
+- Provider request payload building (OpenAI and Anthropic formats)
+- Full async/await support with `async-trait` crate
+- 31 unit tests covering all provider implementations
+- `PROVIDER_INTEGRATION.md` documentation with architecture and usage examples
+- Support for custom API base URLs per provider
+- Provider availability checking via `is_available()` method
+
+### Notes
+- Phase 2.1 (AI Provider Integration) complete
+- Trait-based design ready for additional providers (Ollama, Cohere, etc.)
+- HTTP client integration deferred to Phase 2.3
+- Retry logic and caching deferred to Phase 3
+- All tests passing with 100% success rate
 
 ## [0.0.1] - 2024-11-19
 
