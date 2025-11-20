@@ -1,0 +1,69 @@
+#!/bin/bash
+
+set -e
+
+BOLD='\033[1m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SMART_TEST_SCRIPT="$SCRIPT_DIR/smart-test.sh"
+
+if [ ! -f "$SMART_TEST_SCRIPT" ]; then
+    echo -e "${RED}Error: smart-test.sh not found at $SMART_TEST_SCRIPT${NC}"
+    exit 1
+fi
+
+echo ""
+echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}  Pre-Push Hook: Smart Test Validation${NC}"
+echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+MODE="changed-only"
+
+if [ "$1" = "--force-full" ]; then
+    MODE="full"
+    echo -e "${CYAN}Mode: Full test suite (explicit --force-full)${NC}"
+    echo ""
+elif [ "$1" = "--changed-only" ]; then
+    MODE="changed-only"
+    echo -e "${CYAN}Mode: Smart testing (changed modules only)${NC}"
+    echo ""
+else
+    echo -e "${CYAN}Mode: Smart testing (changed modules only)${NC}"
+    echo -e "${YELLOW}Tip: Use --force-full to run complete test suite${NC}"
+    echo ""
+fi
+
+echo -e "${BOLD}Running validation...${NC}"
+echo ""
+
+if bash "$SMART_TEST_SCRIPT" "$MODE"; then
+    echo ""
+    echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}✅ All validations passed!${NC}"
+    echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${CYAN}Proceeding with push...${NC}"
+    echo ""
+    exit 0
+else
+    EXIT_CODE=$?
+    echo ""
+    echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${RED}✗ Validation failed!${NC}"
+    echo -e "${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${YELLOW}Bypass options:${NC}"
+    echo -e "  ${CYAN}git push --no-verify${NC}          Skip all hooks (not recommended)"
+    echo -e "  ${CYAN}git push --no-verify-all${NC}     Alias for above"
+    echo ""
+    echo -e "${YELLOW}Alternative:${NC}"
+    echo -e "  ${CYAN}$SMART_TEST_SCRIPT full${NC}   Force full test suite and retry push"
+    echo ""
+    exit $EXIT_CODE
+fi

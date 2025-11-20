@@ -38,6 +38,9 @@
 git clone https://github.com/zed-industries/zed-copilot.git
 cd zed-copilot
 
+# Install git hooks (optional but recommended)
+bash scripts/setup-hooks.sh
+
 # Build extension
 cargo build --release
 
@@ -75,6 +78,22 @@ Open Zed logs (`zed: open log`) and look for:
 ```
 
 ✅ **You're ready!** See **[docs/](docs/)** for detailed setup and configuration.
+
+---
+
+## Development Setup
+
+After cloning, install git hooks to ensure code quality:
+
+```bash
+bash scripts/setup-hooks.sh
+```
+
+This enables **pre-commit** and **pre-push** hooks that:
+- ✅ Format and lint checks on commit (fast, ~5-10 sec)
+- ✅ Smart test validation on push (~20-45 sec, tests changed modules only)
+
+**Learn more:** [Git Hooks Documentation](docs/GIT_HOOKS.md)
 
 ---
 

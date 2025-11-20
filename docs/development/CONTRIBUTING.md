@@ -30,6 +30,9 @@ cd zed-copilot
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
+# Install git hooks (highly recommended)
+bash scripts/setup-hooks.sh
+
 # Build the project
 cargo build --release
 
@@ -125,6 +128,22 @@ Read these docs to understand the project:
 - **[ROADMAP.md](ROADMAP.md)** — Project timeline and priorities
 - **[../getting-started/SETUP.md](../getting-started/SETUP.md)** — Installation and setup
 - **[../getting-started/QUICKSTART.md](../getting-started/QUICKSTART.md)** — Quick start guide
+- **[../../docs/GIT_HOOKS.md](../../docs/GIT_HOOKS.md)** — Git hooks and pre-push validation
+
+### Git Hooks Setup
+
+After cloning and before making changes, install git hooks:
+
+```bash
+bash scripts/setup-hooks.sh
+```
+
+This installs **pre-commit** and **pre-push** hooks that:
+- Validate code formatting and linting on commit (fast, ~5-10 sec)
+- Run smart tests on push (only for changed modules, ~20-45 sec)
+- Prevent test failures from reaching CI
+
+Hooks are optional but **highly recommended** to catch issues early. See [GIT_HOOKS.md](../../docs/GIT_HOOKS.md) for details.
 
 ### Making Changes
 
@@ -162,6 +181,8 @@ This runs:
 - `cargo fmt` — Code formatting
 - `cargo clippy` — Linting and warnings
 - `cargo test` — All tests
+
+**Note:** If you have git hooks installed, `cargo fmt` and `cargo clippy` checks are enforced automatically on commit. You can also run `scripts/smart-test.sh` to preview what tests will run on push.
 
 **Fix any issues before committing.**
 
