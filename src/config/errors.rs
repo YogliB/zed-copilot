@@ -12,13 +12,23 @@ pub enum ConfigError {
 impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ConfigError::ValidationError(msg) => write!(f, "Configuration validation failed: {}", msg),
+            ConfigError::ValidationError(msg) => {
+                write!(f, "Configuration validation failed: {}", msg)
+            }
             ConfigError::MissingField(msg) => write!(f, "Missing required field: {}", msg),
             ConfigError::EnvVarNotFound(msg) => {
-                write!(f, "Environment variable not found: {}. Set it before running Zed.", msg)
+                write!(
+                    f,
+                    "Environment variable not found: {}. Set it before running Zed.",
+                    msg
+                )
             }
             ConfigError::InvalidProvider(msg) => {
-                write!(f, "Invalid or unsupported provider: {}. Supported providers: openai, anthropic", msg)
+                write!(
+                    f,
+                    "Invalid or unsupported provider: {}. Supported providers: openai, anthropic",
+                    msg
+                )
             }
             ConfigError::ParseError(msg) => write!(f, "Failed to parse configuration: {}", msg),
         }

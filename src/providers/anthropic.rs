@@ -1,6 +1,6 @@
+use crate::http::anthropic::AnthropicHttpClient;
 use crate::providers::error::{ProviderError, ProviderResult};
 use crate::providers::trait_def::AiProvider;
-use crate::http::anthropic::AnthropicHttpClient;
 
 pub struct AnthropicProvider {
     api_key: String,
@@ -41,7 +41,7 @@ impl AnthropicProvider {
     }
 }
 
-#[async_trait::async_trait]
+#[async_trait::async_trait(?Send)]
 impl AiProvider for AnthropicProvider {
     async fn complete(&self, prompt: &str) -> ProviderResult<String> {
         if prompt.is_empty() {
@@ -50,7 +50,9 @@ impl AiProvider for AnthropicProvider {
             ));
         }
 
-        self.http_client.complete(prompt, &self.model, &self.api_key).await
+        self.http_client
+            .complete(prompt, &self.model, &self.api_key)
+            .await
     }
 
     async fn is_available(&self) -> bool {
@@ -72,10 +74,8 @@ mod tests {
 
     #[test]
     fn test_anthropic_provider_new_valid() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-sonnet".to_string(),
-        );
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-sonnet".to_string());
         assert!(provider.is_ok());
     }
 
@@ -87,71 +87,58 @@ mod tests {
 
     #[test]
     fn test_anthropic_provider_new_empty_model() {
-        let result =
-            AnthropicProvider::new("sk-ant-test-key".to_string(), "".to_string());
+        let result = AnthropicProvider::new("sk-ant-test-key".to_string(), "".to_string());
         assert!(result.is_err());
     }
 
     #[test]
     fn test_anthropic_provider_name() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-sonnet".to_string(),
-        )
-        .unwrap();
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-sonnet".to_string())
+                .unwrap();
         assert_eq!(provider.name(), "anthropic");
     }
 
     #[test]
     fn test_anthropic_provider_model() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-opus".to_string(),
-        )
-        .unwrap();
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-opus".to_string())
+                .unwrap();
         assert_eq!(provider.model(), "claude-3-opus");
     }
 
     #[test]
     fn test_anthropic_provider_with_api_base() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-sonnet".to_string(),
-        )
-        .unwrap()
-        .with_api_base("https://custom.anthropic.com/v1".to_string())
-        .unwrap();
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-sonnet".to_string())
+                .unwrap()
+                .with_api_base("https://custom.anthropic.com/v1".to_string())
+                .unwrap();
         assert_eq!(provider.api_base, "https://custom.anthropic.com/v1");
     }
 
     #[tokio::test]
     async fn test_anthropic_provider_is_available_with_key() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-sonnet".to_string(),
-        )
-        .unwrap();
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-sonnet".to_string())
+                .unwrap();
         assert!(provider.is_available().await);
     }
 
     #[tokio::test]
     async fn test_anthropic_provider_complete_empty_prompt() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-sonnet".to_string(),
-        )
-        .unwrap();
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-sonnet".to_string())
+                .unwrap();
         let result = provider.complete("").await;
         assert!(result.is_err());
     }
 
     #[test]
     fn test_anthropic_build_request_payload() {
-        let provider = AnthropicProvider::new(
-            "sk-ant-test-key".to_string(),
-            "claude-3-sonnet".to_string(),
-        )
-        .unwrap();
+        let provider =
+            AnthropicProvider::new("sk-ant-test-key".to_string(), "claude-3-sonnet".to_string())
+                .unwrap();
         let payload = serde_json::json!({
             "model": provider.model(),
             "messages": [

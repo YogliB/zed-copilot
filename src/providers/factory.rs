@@ -11,10 +11,7 @@ impl ProviderFactory {
         Ok(Box::new(provider))
     }
 
-    pub fn create_anthropic(
-        api_key: String,
-        model: String,
-    ) -> ProviderResult<Box<dyn AiProvider>> {
+    pub fn create_anthropic(api_key: String, model: String) -> ProviderResult<Box<dyn AiProvider>> {
         let provider = AnthropicProvider::new(api_key, model)?;
         Ok(Box::new(provider))
     }
@@ -24,8 +21,7 @@ impl ProviderFactory {
         model: String,
         api_base: String,
     ) -> ProviderResult<Box<dyn AiProvider>> {
-        let provider = OpenAiProvider::new(api_key, model)?
-            .with_api_base(api_base)?;
+        let provider = OpenAiProvider::new(api_key, model)?.with_api_base(api_base)?;
         Ok(Box::new(provider))
     }
 
@@ -34,8 +30,7 @@ impl ProviderFactory {
         model: String,
         api_base: String,
     ) -> ProviderResult<Box<dyn AiProvider>> {
-        let provider = AnthropicProvider::new(api_key, model)?
-            .with_api_base(api_base)?;
+        let provider = AnthropicProvider::new(api_key, model)?.with_api_base(api_base)?;
         Ok(Box::new(provider))
     }
 }
@@ -46,17 +41,13 @@ mod tests {
 
     #[test]
     fn test_factory_create_openai() {
-        let result = ProviderFactory::create_openai(
-            "sk-test-key".to_string(),
-            "gpt-4".to_string(),
-        );
+        let result = ProviderFactory::create_openai("sk-test-key".to_string(), "gpt-4".to_string());
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_factory_create_openai_invalid() {
-        let result =
-            ProviderFactory::create_openai("".to_string(), "gpt-4".to_string());
+        let result = ProviderFactory::create_openai("".to_string(), "gpt-4".to_string());
         assert!(result.is_err());
     }
 
@@ -71,10 +62,8 @@ mod tests {
 
     #[test]
     fn test_factory_create_anthropic_invalid() {
-        let result = ProviderFactory::create_anthropic(
-            "".to_string(),
-            "claude-3-sonnet".to_string(),
-        );
+        let result =
+            ProviderFactory::create_anthropic("".to_string(), "claude-3-sonnet".to_string());
         assert!(result.is_err());
     }
 
@@ -100,11 +89,8 @@ mod tests {
 
     #[test]
     fn test_factory_openai_provider_name() {
-        let provider = ProviderFactory::create_openai(
-            "sk-test-key".to_string(),
-            "gpt-4".to_string(),
-        )
-        .unwrap();
+        let provider =
+            ProviderFactory::create_openai("sk-test-key".to_string(), "gpt-4".to_string()).unwrap();
         assert_eq!(provider.name(), "openai");
     }
 

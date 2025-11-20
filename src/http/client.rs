@@ -1,5 +1,5 @@
-use crate::providers::error::{ProviderError, ProviderResult};
 use crate::http::retry::RetryPolicy;
+use crate::providers::error::{ProviderError, ProviderResult};
 use reqwest::Client;
 use std::time::Duration;
 
@@ -10,12 +10,21 @@ pub struct HttpClient {
     retry_policy: RetryPolicy,
 }
 
+impl Default for HttpClient {
+    fn default() -> Self {
+        Self {
+            client: Client::new(),
+            timeout: Duration::from_secs(30),
+            retry_policy: RetryPolicy::default(),
+        }
+    }
+}
+
 impl HttpClient {
     pub fn new(timeout: Duration, retry_policy: RetryPolicy) -> ProviderResult<Self> {
-        let client = Client::builder()
-            .timeout(timeout)
-            .build()
-            .map_err(|e| ProviderError::NetworkError(format!("Failed to build HTTP client: {}", e)))?;
+        let client = Client::builder().build().map_err(|e| {
+            ProviderError::NetworkError(format!("Failed to build HTTP client: {}", e))
+        })?;
 
         Ok(HttpClient {
             client,
@@ -24,16 +33,17 @@ impl HttpClient {
         })
     }
 
-    pub fn default() -> ProviderResult<Self> {
-        Self::new(Duration::from_secs(30), RetryPolicy::default())
-    }
-
     pub fn with_retry_policy(mut self, retry_policy: RetryPolicy) -> Self {
         self.retry_policy = retry_policy;
         self
     }
 
-    pub async fn post(&self, url: &str, body: serde_json::Value, api_key: &str) -> ProviderResult<String> {
+    pub async fn post(
+        &self,
+        url: &str,
+        body: serde_json::Value,
+        api_key: &str,
+    ) -> ProviderResult<String> {
         let mut attempt = 0;
 
         loop {
@@ -71,8 +81,6 @@ impl HttpClient {
             .map_err(|e| {
                 if e.is_timeout() {
                     ProviderError::NetworkError("Request timeout".to_string())
-                } else if e.is_connect() {
-                    ProviderError::NetworkError("Connection error".to_string())
                 } else {
                     ProviderError::NetworkError(format!("HTTP request failed: {}", e))
                 }
@@ -81,20 +89,13 @@ impl HttpClient {
         let status = response.status();
 
         if status.is_success() {
-            response
-                .text()
-                .await
-                .map_err(|e| ProviderError::NetworkError(format!("Failed to read response body: {}", e)))
+            response.text().await.map_err(|e| {
+                ProviderError::NetworkError(format!("Failed to read response body: {}", e))
+            })
         } else if status.is_server_error() {
-            Err(ProviderError::ApiError(format!(
-                "Server error: {}",
-                status
-            )))
+            Err(ProviderError::ApiError(format!("Server error: {}", status)))
         } else if status.is_client_error() {
-            Err(ProviderError::ApiError(format!(
-                "Client error: {}",
-                status
-            )))
+            Err(ProviderError::ApiError(format!("Client error: {}", status)))
         } else {
             Err(ProviderError::ApiError(format!(
                 "Unexpected status code: {}",
@@ -132,19 +133,14 @@ mod tests {
 
     #[test]
     fn test_http_client_default() {
-        let result = HttpClient::default();
-        assert!(result.is_ok());
-
-        let client = result.unwrap();
+        let client = HttpClient::default();
         assert_eq!(client.timeout(), Duration::from_secs(30));
     }
 
     #[test]
     fn test_http_client_with_retry_policy() {
         let policy = RetryPolicy::new(5, 500, 16000);
-        let client = HttpClient::default()
-            .unwrap()
-            .with_retry_policy(policy.clone());
+        let client = HttpClient::default().with_retry_policy(policy.clone());
 
         assert_eq!(client.retry_policy().max_retries(), 5);
     }

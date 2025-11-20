@@ -1,5 +1,5 @@
-use crate::providers::error::{ProviderError, ProviderResult};
 use crate::http::client::HttpClient;
+use crate::providers::error::{ProviderError, ProviderResult};
 use serde_json::{json, Value};
 use std::time::Duration;
 
@@ -22,14 +22,16 @@ impl AnthropicHttpClient {
         self
     }
 
-    pub async fn complete(&self, prompt: &str, model: &str, api_key: &str) -> ProviderResult<String> {
+    pub async fn complete(
+        &self,
+        prompt: &str,
+        model: &str,
+        api_key: &str,
+    ) -> ProviderResult<String> {
         let request_body = self.build_request_payload(prompt, model);
         let url = format!("{}/messages", self.api_base);
 
-        let response_text = self
-            .http_client
-            .post(&url, request_body, api_key)
-            .await?;
+        let response_text = self.http_client.post(&url, request_body, api_key).await?;
 
         self.parse_response(&response_text)
     }
@@ -48,8 +50,9 @@ impl AnthropicHttpClient {
     }
 
     fn parse_response(&self, response_text: &str) -> ProviderResult<String> {
-        let response: Value = serde_json::from_str(response_text)
-            .map_err(|e| ProviderError::ParseError(format!("Failed to parse Anthropic response: {}", e)))?;
+        let response: Value = serde_json::from_str(response_text).map_err(|e| {
+            ProviderError::ParseError(format!("Failed to parse Anthropic response: {}", e))
+        })?;
 
         response["content"][0]["text"]
             .as_str()

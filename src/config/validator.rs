@@ -38,9 +38,9 @@ impl ConfigValidator {
     }
 
     fn validate_openai_config(config: &Option<OpenAiConfig>) -> ConfigResult<()> {
-        let config = config.as_ref().ok_or_else(|| {
-            ConfigError::MissingField("openai configuration section".to_string())
-        })?;
+        let config = config
+            .as_ref()
+            .ok_or_else(|| ConfigError::MissingField("openai configuration section".to_string()))?;
 
         if config.api_key.is_empty() {
             return Err(ConfigError::MissingField(

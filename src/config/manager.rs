@@ -99,10 +99,7 @@ impl ConfigManager {
     }
 
     pub fn get_chat_config(&self) -> ChatConfig {
-        self.config
-            .chat
-            .clone()
-            .unwrap_or_else(ChatConfig::default)
+        self.config.chat.clone().unwrap_or_default()
     }
 
     pub fn is_enabled(&self) -> bool {

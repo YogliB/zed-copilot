@@ -15,9 +15,8 @@ impl EnvInterpolator {
                 if chars.peek() == Some(&'{') {
                     chars.next();
                     let var_name = Self::read_until_closing_brace(&mut chars)?;
-                    let var_value = env::var(&var_name).map_err(|_| {
-                        ConfigError::EnvVarNotFound(var_name.clone())
-                    })?;
+                    let var_value = env::var(&var_name)
+                        .map_err(|_| ConfigError::EnvVarNotFound(var_name.clone()))?;
                     result.push_str(&var_value);
                 } else {
                     result.push(ch);
@@ -36,7 +35,7 @@ impl EnvInterpolator {
         let mut var_name = String::new();
         let mut found_close = false;
 
-        while let Some(ch) = chars.next() {
+        for ch in chars.by_ref() {
             if ch == '}' {
                 found_close = true;
                 break;

@@ -51,7 +51,9 @@ fn generate_jitter() -> f64 {
     let rand_val = (std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
-        .as_nanos() % 100) as f64 / 100.0;
+        .as_nanos()
+        % 100) as f64
+        / 100.0;
     0.8 + (rand_val * 0.4)
 }
 
@@ -120,9 +122,7 @@ mod tests {
         let backoff_1_again = policy.calculate_backoff(1);
 
         assert!(backoff_1.as_millis() >= 800 && backoff_1.as_millis() <= 1200);
-        assert!(
-            backoff_1_again.as_millis() >= 800 && backoff_1_again.as_millis() <= 1200
-        );
+        assert!(backoff_1_again.as_millis() >= 800 && backoff_1_again.as_millis() <= 1200);
     }
 
     #[test]
