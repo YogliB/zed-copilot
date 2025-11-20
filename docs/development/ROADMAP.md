@@ -101,12 +101,43 @@ Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension f
 - ✅ Prevent thundering herd with jitter-based retry distribution
 - ✅ Respect provider rate limits with token bucket algorithm
 
+### Phase 2.4: E2E Testing with Contract Validation ✅
+- [x] Wiremock infrastructure for HTTP mocking
+- [x] OpenAPI spec parser for contract validation
+- [x] OpenAI provider E2E tests (19 tests)
+- [x] Anthropic provider E2E tests (21 tests)
+- [x] Automated spec download script
+- [x] YAML preprocessing for large numbers edge case
+- [x] Comprehensive E2E testing documentation
+
+**Status:** Complete — All 40 E2E tests passing ✅
+
+**Deliverables:**
+- 40 passing E2E tests covering both OpenAI and Anthropic providers
+- Fresh OpenAI API spec auto-downloaded on test runs
+- Contract-driven testing with real API schemas
+- `tests/common/openapi.rs` — OpenAPI spec parser and validator
+- `tests/e2e_helpers.rs` — Wiremock server setup utilities
+- `tests/openai_e2e.rs` — 19 OpenAI-specific E2E tests
+- `tests/anthropic_e2e.rs` — 21 Anthropic-specific E2E tests
+- `scripts/download-openai-spec.sh` — Automated spec download
+- `docs/development/E2E_TESTING.md` — Complete E2E testing guide
+- Zero external API calls required for local development
+- All tests run in ~300ms with zero flakiness
+
+**Key Achievements:**
+- Tests validate against live OpenAPI specifications
+- Deterministic, repeatable tests with wiremock mocking
+- Cost-free testing (no API credits burned)
+- Ready for Phase 3 chat interface implementation
+
 **Key Goals for Phase 2:**
 - Enable multiple AI provider support ✅ (Phase 2.1)
 - Secure credential management ✅ (Phase 2.2)
 - Robust error handling for API failures ✅ (Phase 2.3)
 - User-friendly configuration ✅ (Phase 2.2)
 - HTTP integration for real API calls ✅ (Phase 2.3)
+- Comprehensive E2E testing ✅ (Phase 2.4)
 
 **Phase 2 Summary:**
 Phase 2 is now complete! The foundation for AI provider integration is solid:
@@ -115,7 +146,8 @@ Phase 2 is now complete! The foundation for AI provider integration is solid:
 - Reliable HTTP integration with exponential backoff retry logic
 - Rate limiting to respect provider quotas
 - Comprehensive error handling and logging
-Ready for Phase 3: Chat Interface implementation.
+- Contract-driven E2E tests validating against real API specs
+- Ready for Phase 3: Chat Interface implementation.
 
 ## Phase 3: Chat Interface & Core Functionality (v0.2.0) 🎯 PRIMARY
 
