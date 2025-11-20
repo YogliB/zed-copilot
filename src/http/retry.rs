@@ -37,7 +37,8 @@ impl RetryPolicy {
         let capped_delay = exponential_delay.min(self.max_delay_ms);
 
         let jitter = generate_jitter();
-        let final_delay = (capped_delay as f64 * jitter) as u64;
+        let delay_with_jitter = (capped_delay as f64 * jitter) as u64;
+        let final_delay = delay_with_jitter.min(self.max_delay_ms);
 
         Duration::from_millis(final_delay)
     }
