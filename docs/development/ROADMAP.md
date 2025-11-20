@@ -1,4 +1,8 @@
-# Zed Copilot Roadmap
+# Roadmap
+
+Feature timeline and project phases for Zed Copilot.
+
+> **Part of:** [Zed Copilot Documentation](../README.md)
 
 ## Overview
 

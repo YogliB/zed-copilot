@@ -1,5 +1,11 @@
 # Configuration Guide
 
+Reference guide for Zed Copilot configuration schema and options.
+
+> **Part of:** [Zed Copilot Documentation](../README.md)
+>
+> **Quick Start?** See [EXAMPLES.md](../getting-started/EXAMPLES.md) for 13+ ready-to-use configuration examples.
+
 ## Overview
 
 Zed Copilot configuration enables you to:
@@ -82,7 +88,8 @@ The extension will load your configuration on startup.
 - `gpt-4o` — Multimodal, most capable (recommended)
 - `o1` — Advanced reasoning for complex problems
 - `o3-mini` — Lightweight reasoning model
-- `gpt-4-turbo` — Previous generation (not recommended)
+
+> See [../getting-started/EXAMPLES.md](../getting-started/EXAMPLES.md#comparison-when-to-use-what) for detailed model comparison and use cases.
 
 **Example:**
 
@@ -115,9 +122,11 @@ The extension will load your configuration on startup.
 ```
 
 **Supported Models:**
-- `claude-opus-4-1-20250805` — Most powerful, for complex reasoning (recommended)
-- `claude-sonnet-4-20250514` — Balanced intelligence and speed
+- `claude-opus-4-1-20250805` — Most powerful, for complex reasoning
+- `claude-sonnet-4-20250514` — Balanced intelligence and speed (recommended)
 - `claude-haiku-4-5-20251001` — Fastest, most affordable
+
+> See [../getting-started/EXAMPLES.md](../getting-started/EXAMPLES.md#comparison-when-to-use-what) for detailed model comparison and use cases.
 
 **Example:**
 
@@ -222,6 +231,8 @@ echo $OPENAI_API_KEY
 
 ## Complete Configuration Example
 
+Full configuration with both providers:
+
 ```json
 {
   "zed_copilot": {
@@ -235,7 +246,7 @@ echo $OPENAI_API_KEY
     },
     "anthropic": {
       "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-opus-4-1-20250805",
+      "model": "claude-sonnet-4-20250514",
       "api_base": "https://api.anthropic.com/v1",
       "timeout_secs": 30
     },
@@ -248,6 +259,8 @@ echo $OPENAI_API_KEY
   }
 }
 ```
+
+> **More Examples:** See [../getting-started/EXAMPLES.md](../getting-started/EXAMPLES.md) for specific use cases including custom endpoints, multiple providers, and optimized settings.
 
 ## Troubleshooting
 
@@ -368,8 +381,19 @@ cp ~/.config/zed/settings-work.json ~/.config/zed/settings.json
 4. Create new API key
 5. Copy and save securely (only shown once!)
 
+## Related Documentation
+
+- **[../getting-started/EXAMPLES.md](../getting-started/EXAMPLES.md)** — 13+ practical configuration examples
+- **[../getting-started/SETUP.md](../getting-started/SETUP.md)** — Installation and troubleshooting
+- **[../getting-started/QUICKSTART.md](../getting-started/QUICKSTART.md)** — 5-minute setup guide
+- **[../development/DEVELOPMENT.md](../development/DEVELOPMENT.md)** — Architecture and development guide
+- **[../README.md](../README.md)** — Documentation index
+
 ## Support
 
-- **Documentation:** See [DEVELOPMENT.md](./DEVELOPMENT.md) for architecture details
-- **Issues:** Report on [GitHub Issues](https://github.com/zed-industries/zed-copilot/issues)
-- **Discussions:** Join community discussions on GitHub
+- **Issues:** [GitHub Issues](https://github.com/zed-industries/zed-copilot/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/zed-industries/zed-copilot/discussions)
+
+---
+
+**Back to:** [Reference](../README.md#quick-navigation)

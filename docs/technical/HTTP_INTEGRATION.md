@@ -1,5 +1,9 @@
 # HTTP Integration Guide
 
+Technical deep dive into HTTP client and streaming implementation for Zed Copilot.
+
+> **Part of:** [Zed Copilot Documentation](../README.md)
+
 ## Overview
 
 The HTTP integration layer in Phase 2.3 enables real API calls to AI providers (OpenAI and Anthropic). This document describes the architecture, configuration, and usage patterns.

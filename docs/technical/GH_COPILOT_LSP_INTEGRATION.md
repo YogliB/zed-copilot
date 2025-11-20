@@ -1,5 +1,9 @@
 # GitHub Copilot LSP Integration
 
+Technical strategy for GitHub Copilot LSP integration with Zed Copilot.
+
+> **Part of:** [Zed Copilot Documentation](../README.md)
+
 ## Overview
 
 GitHub Copilot via LSP (Language Server Protocol) is a **must-have integration** for Zed Copilot. This document outlines the strategy for integrating GitHub Copilot's LSP server to provide inline code completion and intelligence features alongside Zed Copilot's chat interface.

@@ -1,8 +1,18 @@
-# Zed Copilot Testing Guide
+# Testing Guide
+
+Complete testing strategy and guidelines for Zed Copilot.
+
+> **Part of:** [Zed Copilot Documentation](../README.md)
+>
+> **For Contributors:** See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow.
+
+---
 
 ## Overview
 
-This guide documents the testing strategy for Zed Copilot. Tests are organized into unit tests (in `src/`) and integration tests (in `tests/`), following Rust best practices.
+Zed Copilot uses comprehensive testing to ensure reliability. Tests are organized into unit tests (in `src/`) and integration tests (in `tests/`), following Rust best practices.
+
+**Current Coverage:** 63 tests, all passing ✅
 
 ## Test Organization
 
@@ -418,3 +428,7 @@ The Zed extension API cannot be fully tested in isolation:
 
 **Last Updated:** 2024  
 **Maintained by:** Zed Copilot Contributors
+
+---
+
+**Back to:** [Development](../README.md#quick-navigation)

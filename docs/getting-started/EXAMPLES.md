@@ -2,6 +2,10 @@
 
 Practical setup examples for common use cases.
 
+> **Part of:** [Zed Copilot Documentation](../README.md)
+
+---
+
 ## Example 1: OpenAI with GPT-4o (Recommended)
 
 Most capable multimodal model, best for complex code analysis and understanding images.
@@ -493,4 +497,16 @@ Make sure:
 - [ ] Test by opening chat panel
 - [ ] Verify it's responding correctly
 
-See `CONFIG.md` for detailed documentation and troubleshooting.
+---
+
+## Related Documentation
+
+- **[SETUP.md](SETUP.md)** — Installation and troubleshooting
+- **[QUICKSTART.md](QUICKSTART.md)** — 5-minute setup guide
+- **[../reference/CONFIG.md](../reference/CONFIG.md)** — Configuration schema reference
+- **[../README.md](../README.md)** — Documentation index
+
+---
+
+**Back to:** [Getting Started](../README.md#quick-navigation)
+See [../reference/CONFIG.md](../reference/CONFIG.md) for detailed documentation and troubleshooting.

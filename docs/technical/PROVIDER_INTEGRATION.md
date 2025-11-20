@@ -1,5 +1,9 @@
 # AI Provider Integration
 
+Technical deep dive into AI provider implementation for Zed Copilot.
+
+> **Part of:** [Zed Copilot Documentation](../README.md)
+
 ## Overview
 
 Zed Copilot uses a trait-based abstraction to support multiple AI providers. This design enables seamless provider switching, fallback mechanisms, and easy addition of new providers without modifying core logic.
@@ -440,5 +444,10 @@ See [ROADMAP.md](ROADMAP.md#phase-3-chat-interface--core-functionality) for Phas
 
 ## Related Documentation
 
-- [ROADMAP.md](./ROADMAP.md) — Phase 2 overview
-- [DEVELOPMENT.md](./DEVELOPMENT.md) — Development workflow
+- [../development/ROADMAP.md](../development/ROADMAP.md) — Phase timeline
+- [../development/DEVELOPMENT.md](../development/DEVELOPMENT.md) — Development workflow
+- [../README.md](../README.md) — Documentation index
+
+---
+
+**Back to:** [Technical Docs](../README.md#quick-navigation)
