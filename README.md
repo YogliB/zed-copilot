@@ -45,136 +45,9 @@ cargo build --release
 # Select the zed-copilot directory
 ```
 
-### Verify
+### Configure
 
-Open Zed logs (`zed: open log`) and look for:
-```
-[Zed Copilot] Extension initialized
-```
-
-✅ **You're ready!** See [QUICKSTART.md](docs/QUICKSTART.md) for detailed setup.
-
----
-
-## What Works Now
-
-| Feature | Status | Docs |
-|---------|--------|------|
-| Extension foundation | ✅ Complete | [DEVELOPMENT.md](docs/development/DEVELOPMENT.md) |
-| OpenAI integration | ✅ Complete | [PROVIDER_INTEGRATION.md](docs/technical/PROVIDER_INTEGRATION.md) |
-| Anthropic integration | ✅ Complete | [PROVIDER_INTEGRATION.md](docs/technical/PROVIDER_INTEGRATION.md) |
-| Configuration system | ✅ Complete | [EXAMPLES.md](docs/getting-started/EXAMPLES.md) |
-| HTTP & streaming | ✅ Complete | [HTTP_INTEGRATION.md](docs/technical/HTTP_INTEGRATION.md) |
-| Chat interface | 📅 Q2 2025 | [ROADMAP.md](docs/development/ROADMAP.md) |
-| Code completions | 📅 Q3 2025+ | [GH_COPILOT_LSP_INTEGRATION.md](docs/technical/GH_COPILOT_LSP_INTEGRATION.md) |
-
----
-
-## 📚 Documentation
-
-### 📂 Documentation Structure
-
-```
-docs/
-├── getting-started/          # New users start here
-│   ├── QUICKSTART.md        # 5-minute setup
-│   ├── SETUP.md             # Detailed installation
-│   └── EXAMPLES.md          # Configuration examples
-│
-├── reference/               # Configuration reference
-│   └── CONFIG.md            # Schema and options
-│
-├── development/             # For contributors
-│   ├── CONTRIBUTING.md      # How to contribute
-│   ├── DEVELOPMENT.md       # Architecture guide
-│   ├── TESTING.md           # Testing strategy
-│   └── ROADMAP.md           # Feature timeline
-│
-├── technical/               # Deep technical details
-│   ├── PROVIDER_INTEGRATION.md
-│   ├── GH_COPILOT_LSP_INTEGRATION.md
-│   ├── HTTP_INTEGRATION.md
-│   ├── CHAT_ARCHITECTURE.md
-│   └── RETRY_STRATEGY.md
-│
-└── CHANGELOG.md             # Version history
-```
-
-### 🚀 Getting Started
-
-New to Zed Copilot? Start here:
-
-- **[QUICKSTART.md](docs/getting-started/QUICKSTART.md)** — 5-minute setup guide
-- **[SETUP.md](docs/getting-started/SETUP.md)** — Detailed installation and troubleshooting
-- **[EXAMPLES.md](docs/getting-started/EXAMPLES.md)** — 13+ configuration examples
-
-### ⚙️ Configuration
-
-Learn how to configure Zed Copilot:
-
-- **[EXAMPLES.md](docs/getting-started/EXAMPLES.md)** — Practical examples (cookbook)
-- **[CONFIG.md](docs/reference/CONFIG.md)** — Complete schema reference (manual)
-
-### 👨‍💻 Development
-
-For contributors and developers:
-
-- **[CONTRIBUTING.md](docs/development/CONTRIBUTING.md)** — How to contribute
-- **[DEVELOPMENT.md](docs/development/DEVELOPMENT.md)** — Architecture and workflow
-- **[TESTING.md](docs/development/TESTING.md)** — Testing strategy and guidelines
-- **[ROADMAP.md](docs/development/ROADMAP.md)** — Feature timeline and phases
-
-### 🔧 Technical Details
-
-Deep dives into specific areas:
-
-- **[PROVIDER_INTEGRATION.md](docs/technical/PROVIDER_INTEGRATION.md)** — AI provider implementation
-- **[GH_COPILOT_LSP_INTEGRATION.md](docs/technical/GH_COPILOT_LSP_INTEGRATION.md)** — GitHub Copilot LSP integration
-- **[HTTP_INTEGRATION.md](docs/technical/HTTP_INTEGRATION.md)** — HTTP client and streaming
-- **[CHAT_ARCHITECTURE.md](docs/technical/CHAT_ARCHITECTURE.md)** — Chat system design
-- **[RETRY_STRATEGY.md](docs/technical/RETRY_STRATEGY.md)** — Retry logic details
-
-### 📋 Other
-
-- **[CHANGELOG.md](docs/CHANGELOG.md)** — Version history
-
----
-
-## 🎯 Documentation by Goal
-
-### I want to install and use Zed Copilot
-1. [QUICKSTART.md](docs/getting-started/QUICKSTART.md) — Quick setup
-2. [SETUP.md](docs/getting-started/SETUP.md) — If you run into issues
-3. [EXAMPLES.md](docs/getting-started/EXAMPLES.md) — Configuration
-
-### I want to configure for my use case
-- [EXAMPLES.md](docs/getting-started/EXAMPLES.md) — Ready-to-use configs
-- [CONFIG.md](docs/reference/CONFIG.md) — Schema reference
-- Model comparison in [EXAMPLES.md](docs/getting-started/EXAMPLES.md#comparison-when-to-use-what)
-
-### I want to contribute to the project
-1. [CONTRIBUTING.md](docs/development/CONTRIBUTING.md) — Process
-2. [DEVELOPMENT.md](docs/development/DEVELOPMENT.md) — Architecture
-3. [TESTING.md](docs/development/TESTING.md) — Testing guidelines
-4. [ROADMAP.md](docs/development/ROADMAP.md) — What's planned
-
-### I want to understand the architecture
-- [DEVELOPMENT.md](docs/development/DEVELOPMENT.md) — Start here
-- [PROVIDER_INTEGRATION.md](docs/technical/PROVIDER_INTEGRATION.md) — Provider details
-- [ROADMAP.md](docs/development/ROADMAP.md) — Project phases
-
-### I want to troubleshoot issues
-- [SETUP.md](docs/getting-started/SETUP.md#troubleshooting) — Common issues
-- [EXAMPLES.md](docs/getting-started/EXAMPLES.md#troubleshooting-examples) — Configuration errors
-- [CONFIG.md](docs/reference/CONFIG.md#troubleshooting) — Validation errors
-
----
-
-## Configuration
-
-Zed Copilot is configured via `settings.json` in Zed. API keys use environment variables for security.
-
-### Example: OpenAI with GPT-4o
+Add to your Zed `settings.json`:
 
 ```json
 {
@@ -194,27 +67,59 @@ Set your API key:
 export OPENAI_API_KEY="sk-..."
 ```
 
-### Example: Anthropic Claude
+### Verify
 
-```json
-{
-  "zed_copilot": {
-    "enabled": true,
-    "provider": "anthropic",
-    "anthropic": {
-      "api_key": "${ANTHROPIC_API_KEY}",
-      "model": "claude-sonnet-4-20250514"
-    }
-  }
-}
+Open Zed logs (`zed: open log`) and look for:
+```
+[Zed Copilot] Extension initialized
 ```
 
-Set your API key:
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-```
+✅ **You're ready!** See **[docs/](docs/)** for detailed setup and configuration.
 
-📖 **See [EXAMPLES.md](docs/getting-started/EXAMPLES.md)** for 13+ configuration examples covering all models and use cases.
+---
+
+## What Works Now
+
+| Feature | Status |
+|---------|--------|
+| Extension foundation | ✅ Complete |
+| OpenAI integration | ✅ Complete |
+| Anthropic integration | ✅ Complete |
+| Configuration system | ✅ Complete |
+| HTTP & streaming | ✅ Complete |
+| Chat interface | 📅 Q2 2025 |
+| Code completions | 📅 Q3 2025+ |
+
+---
+
+## 📚 Documentation
+
+**Complete documentation:** [docs/](docs/)
+
+### Quick Links
+
+**Getting Started:**
+- [5-Minute Setup](docs/getting-started/QUICKSTART.md) — Quick installation
+- [Detailed Setup](docs/getting-started/SETUP.md) — Troubleshooting included
+- [Configuration Examples](docs/getting-started/EXAMPLES.md) — 13+ ready-to-use configs
+
+**Configuration:**
+- [Examples Cookbook](docs/getting-started/EXAMPLES.md) — Copy-paste configurations
+- [Schema Reference](docs/reference/CONFIG.md) — Complete options guide
+
+**Development:**
+- [Contributing Guide](docs/development/CONTRIBUTING.md) — How to contribute
+- [Architecture](docs/development/DEVELOPMENT.md) — Understanding the codebase
+- [Testing Strategy](docs/development/TESTING.md) — Testing guidelines
+- [Roadmap](docs/development/ROADMAP.md) — Feature timeline
+
+**Technical:**
+- [Provider Integration](docs/technical/PROVIDER_INTEGRATION.md) — AI provider implementation
+- [HTTP Integration](docs/technical/HTTP_INTEGRATION.md) — Network layer
+- [All Technical Docs](docs/technical/) — Deep dives
+
+**Other:**
+- [Changelog](docs/CHANGELOG.md) — Version history
 
 ---
 
@@ -230,10 +135,32 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 - **Claude Sonnet 4** — Balanced speed and quality (recommended)
 - **Claude Haiku 4.5** — Fastest, most affordable
 
-### Future
-- **GitHub Copilot LSP** — Inline completions (Q3 2025+)
-- **Local models** — Ollama support
-- **Custom providers** — Extensible architecture
+📖 **See [Configuration Examples](docs/getting-started/EXAMPLES.md)** for model comparison and configs.
+
+---
+
+## Roadmap
+
+**Current Phase:** Phase 2.3 — HTTP Integration ✅
+
+**Timeline:**
+- ✅ **Phase 1** — Foundation complete
+- ✅ **Phase 2** — Provider integration complete
+- 📅 **Phase 3** — Chat interface (Q2 2025) 🎯 **Next milestone**
+- 📅 **Phase 4** — GitHub Copilot LSP & completions (Q3 2025+)
+
+📖 **See [ROADMAP.md](docs/development/ROADMAP.md)** for detailed timeline.
+
+---
+
+## Contributing
+
+Contributions welcome! Please:
+
+1. Read [CONTRIBUTING.md](docs/development/CONTRIBUTING.md)
+2. Follow coding standards in [zed-rules/AGENTS.md](https://github.com/zed-industries/zed-rules/blob/main/AGENTS.md)
+3. Run `make check-all` before submitting
+4. Write tests for new features
 
 ---
 
@@ -261,40 +188,7 @@ zed-copilot/
 └── Cargo.toml              # Dependencies
 ```
 
-### Test Coverage
-
-- **63 tests** — All passing ✅
-- **Unit tests** — Provider logic, configuration
-- **Integration tests** — End-to-end workflows
-
-Run tests: `cargo test`
-
----
-
-## Roadmap
-
-**Current Phase:** Phase 2.3 — HTTP Integration ✅
-
-**Timeline:**
-- ✅ **Phase 1** — Foundation complete
-- ✅ **Phase 2.1** — AI provider abstraction complete
-- ✅ **Phase 2.2** — Configuration system complete
-- ✅ **Phase 2.3** — HTTP integration complete
-- 📅 **Phase 3** — Chat interface (Q2 2025) 🎯 **Primary feature**
-- 📅 **Phase 4** — GitHub Copilot LSP & completions (Q3 2025+)
-
-📖 **See [ROADMAP.md](docs/ROADMAP.md)** for detailed timeline and features.
-
----
-
-## Contributing
-
-Contributions welcome! Please:
-
-1. Read [CONTRIBUTING.md](docs/development/CONTRIBUTING.md)
-2. Follow coding standards in [zed-rules/AGENTS.md](https://github.com/zed-industries/zed-rules/blob/main/AGENTS.md)
-3. Run `make check-all` before submitting
-4. Write tests for new features
+📖 **See [DEVELOPMENT.md](docs/development/DEVELOPMENT.md)** for architecture details.
 
 ---
 
@@ -322,7 +216,7 @@ Contributions welcome! Please:
 
 ## Support
 
-- 📖 **Documentation** — Start with [QUICKSTART.md](docs/getting-started/QUICKSTART.md)
+- 📖 **Documentation** — [docs/](docs/)
 - 🐛 **Issues** — [GitHub Issues](https://github.com/zed-industries/zed-copilot/issues)
 - 💬 **Discussions** — [GitHub Discussions](https://github.com/zed-industries/zed-copilot/discussions)
 
