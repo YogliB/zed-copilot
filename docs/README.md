@@ -127,6 +127,15 @@ For contributors and developers:
 - Mocking strategies
 - Writing new tests
 
+### [development/GIT_HOOKS.md](development/GIT_HOOKS.md)
+**Git hooks & pre-push validation** — Prevent test failures locally.
+
+- Pre-commit validation (format + lint)
+- Pre-push smart testing (changed modules only)
+- Installation and setup
+- Troubleshooting guide
+- Bypass procedures
+
 ### [development/ROADMAP.md](development/ROADMAP.md)
 **Feature timeline** — What's built, what's next.
 
@@ -136,7 +145,7 @@ For contributors and developers:
 - Feature priorities
 - Future plans
 
-**Recommended path:** CONTRIBUTING → DEVELOPMENT → TESTING → ROADMAP
+**Recommended path:** CONTRIBUTING → DEVELOPMENT → TESTING → GIT_HOOKS → ROADMAP
 
 ---
 
@@ -209,7 +218,8 @@ Detailed technical documentation:
 1. [development/CONTRIBUTING.md](development/CONTRIBUTING.md) — Process
 2. [development/DEVELOPMENT.md](development/DEVELOPMENT.md) — Architecture
 3. [development/TESTING.md](development/TESTING.md) — Testing guidelines
-4. [development/ROADMAP.md](development/ROADMAP.md) — What's planned
+4. [development/GIT_HOOKS.md](development/GIT_HOOKS.md) — Local validation setup
+5. [development/ROADMAP.md](development/ROADMAP.md) — What's planned
 
 ### I want to understand the architecture
 

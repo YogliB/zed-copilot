@@ -128,7 +128,7 @@ Read these docs to understand the project:
 - **[ROADMAP.md](ROADMAP.md)** — Project timeline and priorities
 - **[../getting-started/SETUP.md](../getting-started/SETUP.md)** — Installation and setup
 - **[../getting-started/QUICKSTART.md](../getting-started/QUICKSTART.md)** — Quick start guide
-- **[../../docs/GIT_HOOKS.md](../../docs/GIT_HOOKS.md)** — Git hooks and pre-push validation
+- **[GIT_HOOKS.md](GIT_HOOKS.md)** — Git hooks and pre-push validation
 
 ### Git Hooks Setup
 
@@ -143,7 +143,7 @@ This installs **pre-commit** and **pre-push** hooks that:
 - Run smart tests on push (only for changed modules, ~20-45 sec)
 - Prevent test failures from reaching CI
 
-Hooks are optional but **highly recommended** to catch issues early. See [GIT_HOOKS.md](../../docs/GIT_HOOKS.md) for details.
+Hooks are optional but **highly recommended** to catch issues early. See [GIT_HOOKS.md](GIT_HOOKS.md) for details.
 
 ### Making Changes
 

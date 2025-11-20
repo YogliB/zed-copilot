@@ -38,28 +38,24 @@ A comprehensive git hooks system for the `zed-copilot` project that prevents tes
 
 ### Documentation Created
 
-5. **`docs/GIT_HOOKS.md`** (457 lines)
-   - Complete user documentation
-   - Quick start guide
-   - Detailed hook behavior
-   - Smart test detection explanation
-   - Multiple scenario examples
-   - Comprehensive troubleshooting
-   - FAQ and references
+5. **`docs/development/GIT_HOOKS.md`** (457 lines) ✅ ALIGNED TO REPO STANDARDS
+   - Moved to development/ folder (developer-focused)
+   - Added "Part of:" breadcrumb navigation
+   - Added TL;DR section at top
+   - Simplified introduction
+   - Updated related documentation links
+   - Complete user documentation with examples
+   - Comprehensive troubleshooting and FAQ
 
-6. **`IMPLEMENTATION_SUMMARY.md`** (431 lines)
-   - Technical implementation details
-   - Design decisions rationale
-   - File structure and changes
-   - Success criteria checklist
-   - Quality assurance notes
+6. **`docs/archive/GIT_HOOKS_IMPLEMENTATION.md`** (431 lines) ✅ ARCHIVED
+   - Moved from root to docs/archive/
+   - Technical implementation details for reference
+   - Design decisions and rationale
 
-7. **`QUICK_REFERENCE.md`** (192 lines)
-   - Quick start guide
-   - Common commands
-   - Troubleshooting matrix
-   - Pro tips
-   - FAQ
+7. **Quick Reference** ✅ INTEGRATED
+   - Integrated into GIT_HOOKS.md as TL;DR section
+   - Removed separate QUICK_REFERENCE.md from root
+   - Keeps project root clean
 
 ### Files Updated
 

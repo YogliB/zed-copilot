@@ -93,7 +93,7 @@ This enables **pre-commit** and **pre-push** hooks that:
 - ✅ Format and lint checks on commit (fast, ~5-10 sec)
 - ✅ Smart test validation on push (~20-45 sec, tests changed modules only)
 
-**Learn more:** [Git Hooks Documentation](docs/GIT_HOOKS.md)
+**Learn more:** [Git Hooks Documentation](docs/development/GIT_HOOKS.md)
 
 ---
 

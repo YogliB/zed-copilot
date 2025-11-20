@@ -1,26 +1,38 @@
 # Git Hooks & Pre-Push Validation
 
+> Prevent test failures from reaching CI with smart local validation
+
+**Part of:** [Development Documentation](../README.md#-development--contributing)
+
+---
+
+## TL;DR
+
+**Install once:**
+```bash
+bash scripts/setup-hooks.sh
+```
+
+**Then commit/push normally:**
+- Pre-commit validates format & linting (~5-10 sec)
+- Pre-push runs smart tests for changed modules (~20-45 sec)
+
+**That's it.** Hooks prevent bugs like the backoff test failure from reaching CI.
+
+---
+
 ## Overview
 
-This project uses **git hooks** to enforce code quality standards before commits and tests before pushes. The system is designed to catch issues early while maintaining developer velocity through **intelligent test filtering**.
+Git hooks enforce code quality before commits and run tests before pushes. The system catches issues early while maintaining developer velocity through intelligent test filtering.
 
-### Architecture
+**How it works:**
 
 ```
-Developer Workflow
-  ↓
-git commit
-  ↓
-[Pre-Commit Hook] ← Format + Linting (fast, ~5-10 sec)
-  ↓
-git push
-  ↓
-[Pre-Push Hook] ← Smart test suite (~20-45 sec)
-  ├── Detect changed modules
-  ├── Run targeted tests (or full suite if needed)
-  └── Validate WASM build
-  ↓
-Remote (CI/CD continues)
+git commit → Pre-commit (fmt + clippy, ~5-10s)
+git push   → Pre-push (smart tests, ~20-45s)
+             ├─ Detect changed modules
+             ├─ Run targeted tests
+             └─ Validate WASM build
 ```
 
 ## Quick Start
@@ -453,6 +465,10 @@ A: Git only recognizes standard names (pre-commit, pre-push, etc.). Custom names
 
 ## Related Documentation
 
-- [DEVELOPMENT.md](./DEVELOPMENT.md) — Architecture and design
-- [CONTRIBUTING.md](../CONTRIBUTING.md) — Contribution guidelines
-- [Makefile](../Makefile) — Available make targets
+- [CONTRIBUTING.md](./CONTRIBUTING.md) — How to contribute
+- [DEVELOPMENT.md](./DEVELOPMENT.md) — Architecture guide
+- [TESTING.md](./TESTING.md) — Testing strategy
+
+---
+
+**Back to:** [Development Documentation](../README.md#-development--contributing)
