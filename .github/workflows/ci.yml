@@ -188,10 +188,13 @@ jobs:
           echo "- Linting: ${{ needs.clippy.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Build: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ needs.test.result }}" != "success" ] || \
-             [ "${{ needs.fmt.result }}" != "success" ] || \
-             [ "${{ needs.clippy.result }}" != "success" ] || \
-             [ "${{ needs.build.result }}" != "success" ]; then
+          FAILED=0
+          [ "${{ needs.test.result }}" != "success" ] && FAILED=1
+          [ "${{ needs.fmt.result }}" != "success" ] && FAILED=1
+          [ "${{ needs.clippy.result }}" != "success" ] && FAILED=1
+          [ "${{ needs.build.result }}" != "success" ] && FAILED=1
+
+          if [ $FAILED -eq 1 ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "❌ CI pipeline failed" >> $GITHUB_STEP_SUMMARY
             exit 1
