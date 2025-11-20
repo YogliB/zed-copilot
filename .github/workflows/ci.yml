@@ -2,17 +2,17 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE'
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - 'LICENSE'
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
   workflow_dispatch:
 
 env:
@@ -202,6 +202,3 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
-```
-
-Now I'll create the contributing guidelines file:
