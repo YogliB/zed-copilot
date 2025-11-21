@@ -19,10 +19,10 @@
 | PR  | Title | Repo | Status | Link | Notes |
 | --- | ----- | ---- | ------ | ---- | ----- |
 | 1   | Phase 2: Move Pure Validation Tests to Unit Tier | zed-copilot | 🟢 | https://github.com/YogliB/zed-copilot/pull/1 | Completed: moved 7 pure validation tests to unit tier |
-| 2   | Phase 3: Parameterize Error Response Tests | zed-copilot | ⏸️ | - | Consolidate similar error/validation patterns; reduce duplication |
+| 2   | Phase 3: Parameterize Error Response Tests | zed-copilot | 🟢 | https://github.com/YogliB/zed-copilot/pull/2 | Completed: consolidated error response tests with parameterization |
 | 3   | Phase 4: Lazy-Initialize Mock Server | zed-copilot | ⏸️ | - | Defer mock server startup until first use in E2E tests |
 
-**Status:** 🟢 Phase 2 completed · ⏸️ Phases 3–4 pending
+**Status:** 🟢 Phases 2–3 completed · ⏸️ Phase 4 pending
 
 ---
 
@@ -84,9 +84,9 @@
 
 ---
 
-## PR 2: Phase 3 — Parameterize Error Response Tests — ⏸️
+## PR 2: Phase 3 — Parameterize Error Response Tests — 🟢
 
-**Repo:** zed-copilot · **Link:** - · **ETA:** 3–4h dev + 1–2h review
+**Repo:** zed-copilot · **Link:** https://github.com/YogliB/zed-copilot/pull/2 · **Status:** Merged 2025-11-21
 
 **Files:**
 - `tests/openai_e2e.rs` (consolidate similar error patterns)
@@ -125,18 +125,25 @@
    - Provide example template for future E2E tests
    - Document when to parameterize vs. keep separate (boundary between "enough scenarios" and "too many")
 
-**Acceptance:**
+**Acceptance:** ✅ All criteria met
 
-- [ ] Parameterized helper created and tested
-- [ ] 5–6 similar tests consolidated into 1–2 parameterized tests
-- [ ] All error scenarios still covered (no test loss)
-- [ ] Test names clearly indicate scenarios being tested
-- [ ] Assertions remain contract-focused (not overfitted)
-- [ ] All checks pass
-- [ ] Perf maintained or improved (expect slight reduction due to fewer test startups: ~20–30ms)
-- [ ] Code follows DRY principle; no duplication across error tests
+- [x] Parameterized helper created and tested
+- [x] 5–6 similar tests consolidated into 1–2 parameterized tests
+- [x] All error scenarios still covered (no test loss)
+- [x] Test names clearly indicate scenarios being tested
+- [x] Assertions remain contract-focused (not overfitted)
+- [x] All checks pass
+- [x] Perf maintained or improved (expect slight reduction due to fewer test startups: ~20–30ms)
+- [x] Code follows DRY principle; no duplication across error tests
 
-**Dependencies:** Blocked by PR 1 (optional, can run in parallel) · Blocks PR 3
+**Dependencies:** Blocked by PR 1 (optional, can run in parallel) · Unblocks PR 3
+
+**Result:** Successfully consolidated error response tests with parameterization:
+- Created `MockErrorScenario` struct in `tests/common/mod.rs`
+- Consolidated 5–6 individual error tests into parameterized test loop
+- All error scenarios covered: auth errors, rate limits, malformed responses, missing fields
+- Reduced code duplication and improved maintainability
+- Merged 2025-11-21 10:30:45 UTC
 
 **Rationale:**
 - DRY: eliminates repeating mock setup code
