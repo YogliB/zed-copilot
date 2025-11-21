@@ -62,8 +62,7 @@ async fn test_anthropic_streaming_response_format() {
     });
 
     assert!(
-        streaming_event.get("type").is_some()
-            && streaming_event.get("delta").is_some(),
+        streaming_event.get("type").is_some() && streaming_event.get("delta").is_some(),
         "Streaming event should have required fields"
     );
 
@@ -71,7 +70,7 @@ async fn test_anthropic_streaming_response_format() {
         .and(path("/messages"))
         .and(header("x-api-key", "sk-ant-test-key"))
         .respond_with(ResponseTemplate::new(200).set_body_string(
-            "event: content_block_delta\ndata: {\"type\":\"content_block_delta\"}\n\n"
+            "event: content_block_delta\ndata: {\"type\":\"content_block_delta\"}\n\n",
         ))
         .mount(&ctx.mock_server)
         .await;
@@ -193,17 +192,17 @@ async fn test_anthropic_message_roles_valid() {
         });
 
         assert!(message.get("role").is_some());
-        assert_eq!(
-            message.get("role").and_then(|r| r.as_str()),
-            Some(role)
-        );
+        assert_eq!(message.get("role").and_then(|r| r.as_str()), Some(role));
     }
 }
 
 #[tokio::test]
 async fn test_anthropic_max_tokens_bounds() {
     let max_tokens = 2048;
-    assert!(max_tokens >= 1 && max_tokens <= 4096, "max_tokens must be between 1 and 4096");
+    assert!(
+        max_tokens >= 1 && max_tokens <= 4096,
+        "max_tokens must be between 1 and 4096"
+    );
 }
 
 #[tokio::test]
@@ -279,7 +278,10 @@ async fn test_anthropic_usage_tracking() {
         assert!(usage.get("input_tokens").is_some());
         assert!(usage.get("output_tokens").is_some());
         assert_eq!(usage.get("input_tokens").and_then(|t| t.as_i64()), Some(50));
-        assert_eq!(usage.get("output_tokens").and_then(|t| t.as_i64()), Some(100));
+        assert_eq!(
+            usage.get("output_tokens").and_then(|t| t.as_i64()),
+            Some(100)
+        );
     }
 }
 

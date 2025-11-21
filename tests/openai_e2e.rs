@@ -167,8 +167,8 @@ async fn test_openai_request_validation() {
         "max_tokens": 100
     });
 
-    let has_required_fields = request_body.get("model").is_some()
-        && request_body.get("messages").is_some();
+    let has_required_fields =
+        request_body.get("model").is_some() && request_body.get("messages").is_some();
     assert!(
         has_required_fields,
         "Request should have required fields: model, messages"
@@ -195,18 +195,24 @@ async fn test_openai_message_roles_valid() {
         });
 
         assert!(message.get("role").is_some());
-        assert_eq!(
-            message.get("role").and_then(|r| r.as_str()),
-            Some(role)
-        );
+        assert_eq!(message.get("role").and_then(|r| r.as_str()), Some(role));
     }
 }
 
 #[tokio::test]
 async fn test_openai_temperature_bounds() {
-    assert!(0.0 >= 0.0 && 0.0 <= 2.0, "Temperature 0.0 should be within bounds");
-    assert!(1.0 >= 0.0 && 1.0 <= 2.0, "Temperature 1.0 should be within bounds");
-    assert!(2.0 >= 0.0 && 2.0 <= 2.0, "Temperature 2.0 should be within bounds");
+    assert!(
+        0.0 >= 0.0 && 0.0 <= 2.0,
+        "Temperature 0.0 should be within bounds"
+    );
+    assert!(
+        1.0 >= 0.0 && 1.0 <= 2.0,
+        "Temperature 1.0 should be within bounds"
+    );
+    assert!(
+        2.0 >= 0.0 && 2.0 <= 2.0,
+        "Temperature 2.0 should be within bounds"
+    );
 
     assert!(
         !(-0.1 >= 0.0 && -0.1 <= 2.0),

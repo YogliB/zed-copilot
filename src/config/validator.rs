@@ -16,6 +16,7 @@ impl ConfigValidator {
         Ok(())
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn validate_provider_selection(config: &RootConfig) -> ConfigResult<()> {
         if config.provider.is_empty() {
             return Err(ConfigError::MissingField(
@@ -29,6 +30,7 @@ impl ConfigValidator {
         }
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn validate_selected_provider(config: &RootConfig) -> ConfigResult<()> {
         match config.provider.as_str() {
             "openai" => Self::validate_openai_config(&config.openai),
@@ -37,6 +39,7 @@ impl ConfigValidator {
         }
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn validate_openai_config(config: &Option<OpenAiConfig>) -> ConfigResult<()> {
         let config = config
             .as_ref()
@@ -63,6 +66,7 @@ impl ConfigValidator {
         Ok(())
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn validate_anthropic_config(config: &Option<AnthropicConfig>) -> ConfigResult<()> {
         let config = config.as_ref().ok_or_else(|| {
             ConfigError::MissingField("anthropic configuration section".to_string())
@@ -89,6 +93,7 @@ impl ConfigValidator {
         Ok(())
     }
 
+    #[cfg_attr(not(test), allow(dead_code))]
     fn validate_chat_config(config: &Option<ChatConfig>) -> ConfigResult<()> {
         if let Some(chat) = config {
             if chat.max_history_messages == 0 {

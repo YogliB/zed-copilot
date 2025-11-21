@@ -1,9 +1,9 @@
+use crate::providers::error::{ProviderError, ProviderResult};
 use async_openai::{
     config::OpenAIConfig,
     types::{ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs},
     Client,
 };
-use crate::providers::error::{ProviderError, ProviderResult};
 use futures::Stream;
 use std::pin::Pin;
 
@@ -82,26 +82,24 @@ impl OpenAiHttpClient {
             .await
             .map_err(|e| map_openai_error(e))?;
 
-        let boxed_stream = Box::pin(
-            futures::stream::unfold(stream, |mut stream| async move {
-                match futures::StreamExt::next(&mut stream).await {
-                    Some(Ok(response)) => {
-                        let content = response
-                            .choices
-                            .first()
-                            .and_then(|choice| choice.delta.content.as_ref())
-                            .map(|s| s.to_string());
+        let boxed_stream = Box::pin(futures::stream::unfold(stream, |mut stream| async move {
+            match futures::StreamExt::next(&mut stream).await {
+                Some(Ok(response)) => {
+                    let content = response
+                        .choices
+                        .first()
+                        .and_then(|choice| choice.delta.content.as_ref())
+                        .map(|s| s.to_string());
 
-                        match content {
-                            Some(text) => Some((Ok(text), stream)),
-                            None => Some((Ok(String::new()), stream)),
-                        }
+                    match content {
+                        Some(text) => Some((Ok(text), stream)),
+                        None => Some((Ok(String::new()), stream)),
                     }
-                    Some(Err(e)) => Some((Err(map_openai_error(e)), stream)),
-                    None => None,
                 }
-            }),
-        );
+                Some(Err(e)) => Some((Err(map_openai_error(e)), stream)),
+                None => None,
+            }
+        }));
 
         Ok(boxed_stream)
     }
@@ -151,9 +149,7 @@ mod tests {
 
     #[test]
     fn test_map_openai_error_api_error() {
-        let error = async_openai::error::OpenAIError::InvalidArgument(
-            "test error".to_string(),
-        );
+        let error = async_openai::error::OpenAIError::InvalidArgument("test error".to_string());
 
         let provider_error = map_openai_error(error);
         match provider_error {

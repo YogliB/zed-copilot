@@ -1,7 +1,13 @@
 use zed_extension_api as zed;
 
+#[cfg(test)]
 pub mod config;
+#[cfg(not(test))]
+mod config;
+
+#[cfg(test)]
 pub mod http;
+#[cfg(test)]
 pub mod providers;
 
 pub struct ZedCopilot;

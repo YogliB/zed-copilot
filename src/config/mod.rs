@@ -1,3 +1,5 @@
+#![cfg_attr(not(test), allow(dead_code, unused_imports))]
+
 pub mod errors;
 pub mod loader;
 pub mod manager;

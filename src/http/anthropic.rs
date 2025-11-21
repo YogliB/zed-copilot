@@ -1,8 +1,8 @@
+use crate::providers::error::{ProviderError, ProviderResult};
 use anthropic_rust::{
     client::Client,
     types::{ContentBlock, Model},
 };
-use crate::providers::error::{ProviderError, ProviderResult};
 use futures::Stream;
 use std::pin::Pin;
 
@@ -16,7 +16,9 @@ impl AnthropicHttpClient {
             .api_key("sk-ant-test-key")
             .model(Model::Claude35Sonnet20241022)
             .build()
-            .map_err(|e| ProviderError::ConfigError(format!("Failed to create Anthropic client: {}", e)))?;
+            .map_err(|e| {
+                ProviderError::ConfigError(format!("Failed to create Anthropic client: {}", e))
+            })?;
 
         Ok(AnthropicHttpClient { client })
     }
@@ -72,29 +74,23 @@ impl AnthropicHttpClient {
             .await
             .map_err(|e| map_anthropic_error(e))?;
 
-        let boxed_stream = Box::pin(
-            futures::stream::unfold(stream, |mut stream| async move {
-                match futures::StreamExt::next(&mut stream).await {
-                    Some(Ok(event)) => {
-                        use anthropic_rust::StreamEvent;
-                        use anthropic_rust::ContentDelta;
+        let boxed_stream = Box::pin(futures::stream::unfold(stream, |mut stream| async move {
+            match futures::StreamExt::next(&mut stream).await {
+                Some(Ok(event)) => {
+                    use anthropic_rust::ContentDelta;
+                    use anthropic_rust::StreamEvent;
 
-                        match event {
-                            StreamEvent::ContentBlockDelta { delta, .. } => {
-                                match delta {
-                                    ContentDelta::TextDelta { text } => {
-                                        Some((Ok(text), stream))
-                                    }
-                                }
-                            }
-                            _ => Some((Ok(String::new()), stream)),
-                        }
+                    match event {
+                        StreamEvent::ContentBlockDelta { delta, .. } => match delta {
+                            ContentDelta::TextDelta { text } => Some((Ok(text), stream)),
+                        },
+                        _ => Some((Ok(String::new()), stream)),
                     }
-                    Some(Err(e)) => Some((Err(map_anthropic_error(e)), stream)),
-                    None => None,
                 }
-            }),
-        );
+                Some(Err(e)) => Some((Err(map_anthropic_error(e)), stream)),
+                None => None,
+            }
+        }));
 
         Ok(boxed_stream)
     }
