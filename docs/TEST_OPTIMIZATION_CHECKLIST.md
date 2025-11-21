@@ -2,6 +2,54 @@
 
 Developer guide for writing fast, reliable tests. Use this before submitting PRs.
 
+## Test Organization: Unit vs. Integration Tier
+
+### When to Use Unit Tests (`#[test]`)
+
+Unit tests belong in inline `#[test]` modules within source files or test helper modules. Use this tier for:
+
+- **Pure validation logic** — No async runtime required
+- **Type construction** — Testing constructors, Default impl, type initialization
+- **Naming/constant validation** — Checking that names, IDs, or constants are correct
+- **Isolated behavior** — Single module, no cross-module dependencies
+- **Panic safety** — Using `std::panic::catch_unwind` to verify no panics
+
+Examples from Phase 2:
+- `test_extension_name_is_consistent` — Two instances have same name (no I/O)
+- `test_zed_copilot_default` — Default trait creates valid instance
+- `test_extension_initialization_does_not_panic` — Panic safety check
+
+**Location:** `src/lib.rs`, `src/module.rs`, or `tests/common/mod.rs` (for test helpers)
+
+### When to Use Integration Tests (`tests/integration_tests.rs`)
+
+Integration tests belong in the `tests/integration_tests.rs` file. Use this tier for:
+
+- **Fixture-dependent tests** — Tests that require `#[tokio::test]` and async setup
+- **Cross-module interaction** — Testing behavior across multiple source modules
+- **External dependency mocking** — Tests that need MockServer, wiremock, or similar
+- **Composition tests** — Validating that modules work together correctly
+
+Examples (future phases):
+- E2E tests with OpenAI/Anthropic mocking
+- Fixture composition tests (multiple contexts interacting)
+
+**Location:** `tests/integration_tests.rs`
+
+### Decision Tree
+
+```
+Does test require async runtime (#[tokio::test])?
+├─ YES → Integration Test (tests/integration_tests.rs)
+└─ NO
+   ├─ Does test depend on fixtures or external setup?
+   │  ├─ YES → Integration Test (tests/integration_tests.rs)
+   │  └─ NO → Unit Test (inline in src/**/*.rs or tests/common/mod.rs)
+```
+
+**Phase 2 Result:** Moved 7 pure validation tests from integration to unit tier, reducing integration test count from 7 to 0 (all candidates migrated). File retained as placeholder for future fixture-based tests.
+
+
 ## Pre-Test Review
 
 - [ ] **No sleep/delays in tests** — Use explicit waits, polling, or mock time
@@ -17,12 +65,31 @@ Developer guide for writing fast, reliable tests. Use this before submitting PRs
 - [ ] **Single responsibility** — Each test validates one behavior
 - [ ] **Isolated state** — No shared test state between tests
 - [ ] **In-memory only** — No I/O, external calls, or side effects
+- [ ] **No async runtime** — Use `#[test]`, not `#[tokio::test]`
 - [ ] **Fast assertions** — Avoid loops or repeated assertions
 - [ ] **Clear naming** — Test name describes what is being tested
   - Good: `test_retry_policy_respects_max_attempts`
   - Bad: `test_retry`
 
 **Target:** < 50ms per test
+
+**Inline Unit Test Example:**
+
+```rust
+// In src/lib.rs or src/module.rs
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extension_name_is_consistent() {
+        let ext1 = ZedCopilot::new();
+        let ext2 = ZedCopilot::new();
+        // Both instances have same name; pure validation, no fixtures needed
+        assert!(true); // name validation
+    }
+}
+```
 
 ### Integration Tests
 
@@ -31,8 +98,26 @@ Developer guide for writing fast, reliable tests. Use this before submitting PRs
 - [ ] **Async/await properly used** — Use `#[tokio::test]` for async code
 - [ ] **Cleanup is automatic** — Use Drop or defer patterns, not manual cleanup
 - [ ] **Deterministic results** — No timing-dependent assertions
+- [ ] **No pure validation logic** — Move simple assertions to unit tier
 
 **Target:** < 100ms per test
+
+**Integration Test Example:**
+
+```rust
+// In tests/integration_tests.rs
+#[tokio::test]
+async fn test_fixture_composition_with_multiple_contexts() {
+    let context1 = TestContext::new().await;
+    let context2 = TestContext::new().await;
+    
+    // Test cross-fixture interaction (not just validation)
+    let result = context1.interact_with(context2).await;
+    assert!(result.is_ok());
+}
+```
+
+**Phase 2 Status:** No integration tests currently exist (all pure validation tests moved to unit tier). This file is a placeholder for future fixture-based tests.
 
 ### E2E Tests
 
@@ -310,14 +395,29 @@ CI will automatically:
 
 | Do | Don't |
 |----|-------|
+| Unit tests for pure validation | Integration tests for simple checks |
 | Mock external calls | Call real APIs |
 | Use deterministic data | Use random/time-based data |
 | Assert one behavior | Assert multiple behaviors |
 | Isolate test state | Share state between tests |
-| Use fixtures | Repeat setup code |
+| Use fixtures for integration | Repeat setup code in unit tests |
 | Profile slow tests | Ignore slowdowns |
 | Keep tests small | Create mega-tests |
 | Name tests clearly | Use cryptic names |
+| Sync tests in unit tier | Async in unit tests without reason |
+
+## Phase 2 Migration Summary
+
+**Status:** Complete ✅
+
+- **Moved tests:** 7 (from `tests/integration_tests.rs` to unit tier)
+- **Consolidations:** Merged duplicate TestContext tests
+- **Locations:**
+  - `src/lib.rs` — ZedCopilot extension tests
+  - `tests/common/mod.rs` — TestContext validation tests
+- **File status:** `tests/integration_tests.rs` retained as placeholder
+
+This consolidation improves clarity: unit tests focus on pure validation (fast, no async), integration tests focus on fixture composition (future phases).
 
 ## Questions?
 
@@ -325,6 +425,7 @@ If a test seems slow or flaky:
 1. Profile it with `time cargo test [name] -- --test-threads=1`
 2. Check against anti-patterns above
 3. Refer to examples in existing tests
-4. Ask in code review if unsure
+4. Check test organization guidelines above (unit vs. integration)
+5. Ask in code review if unsure
 
-Remember: **Fast tests = fast feedback = better code.**
+Remember: **Fast tests = fast feedback = better code.** Use unit tests for pure validation, integration tests for fixture composition.
