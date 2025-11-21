@@ -54,10 +54,54 @@ jobs:
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run unit tests
-        run: cargo test --lib --verbose
+        run: cargo test --lib --verbose 2>&1 | tee test-output-unit.log
 
       - name: Run integration tests
-        run: cargo test --test '*' --verbose
+        run: cargo test --test '*' --verbose 2>&1 | tee test-output-integration.log
+
+      - name: Collect test metrics
+        if: always()
+        run: |
+          cat test-output-unit.log test-output-integration.log > test-output-combined.log
+          python3 .github/scripts/collect_test_metrics.py test-output-combined.log .github/test-metrics/current.json
+        continue-on-error: true
+
+      - name: Upload test metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-metrics
+          path: .github/test-metrics/
+          retention-days: 30
+
+      - name: Generate PR comment
+        if: github.event_name == 'pull_request' && always()
+        run: |
+          python3 .github/scripts/generate_pr_comment.py .github/test-metrics/current.json /tmp/pr-comment.md
+        continue-on-error: true
+
+      - name: Post PR comment
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = '/tmp/pr-comment.md';
+
+            if (!fs.existsSync(path)) {
+              console.log('PR comment file not found, skipping');
+              return;
+            }
+
+            const comment = fs.readFileSync(path, 'utf8');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        continue-on-error: true
 
   fmt:
     name: Rustfmt
