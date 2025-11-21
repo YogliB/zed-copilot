@@ -1,66 +1,135 @@
-use crate::http::client::HttpClient;
+use async_openai::{
+    config::OpenAIConfig,
+    types::{ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs},
+    Client,
+};
 use crate::providers::error::{ProviderError, ProviderResult};
-use serde_json::{json, Value};
-use std::time::Duration;
+use futures::Stream;
+use std::pin::Pin;
 
 pub struct OpenAiHttpClient {
-    http_client: HttpClient,
-    api_base: String,
+    client: Client<OpenAIConfig>,
 }
 
 impl OpenAiHttpClient {
     pub fn new(api_base: String) -> ProviderResult<Self> {
-        let http_client = HttpClient::new(Duration::from_secs(30), Default::default())?;
-        Ok(OpenAiHttpClient {
-            http_client,
-            api_base,
-        })
-    }
+        let config = OpenAIConfig::new().with_api_base(api_base);
 
-    pub fn with_http_client(mut self, http_client: HttpClient) -> Self {
-        self.http_client = http_client;
-        self
+        Ok(OpenAiHttpClient {
+            client: Client::with_config(config),
+        })
     }
 
     pub async fn complete(
         &self,
         prompt: &str,
         model: &str,
-        api_key: &str,
+        _api_key: &str,
     ) -> ProviderResult<String> {
-        let request_body = self.build_request_payload(prompt, model);
-        let url = format!("{}/chat/completions", self.api_base);
+        let user_message = ChatCompletionRequestUserMessageArgs::default()
+            .content(prompt)
+            .build()
+            .map_err(|e| ProviderError::ConfigError(format!("Failed to build message: {}", e)))?;
 
-        let response_text = self.http_client.post(&url, request_body, api_key).await?;
+        let request = CreateChatCompletionRequestArgs::default()
+            .model(model)
+            .messages([user_message.into()])
+            .temperature(0.7)
+            .max_tokens(1024u32)
+            .build()
+            .map_err(|e| ProviderError::ConfigError(format!("Failed to build request: {}", e)))?;
 
-        self.parse_response(&response_text)
-    }
+        let response = self
+            .client
+            .chat()
+            .create(request)
+            .await
+            .map_err(|e| map_openai_error(e))?;
 
-    fn build_request_payload(&self, prompt: &str, model: &str) -> Value {
-        json!({
-            "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "temperature": 0.7,
-            "max_tokens": 1024
-        })
-    }
-
-    fn parse_response(&self, response_text: &str) -> ProviderResult<String> {
-        let response: Value = serde_json::from_str(response_text).map_err(|e| {
-            ProviderError::ParseError(format!("Failed to parse OpenAI response: {}", e))
-        })?;
-
-        response["choices"][0]["message"]["content"]
-            .as_str()
+        response
+            .choices
+            .first()
+            .and_then(|choice| choice.message.content.as_ref())
             .map(|s| s.to_string())
             .ok_or_else(|| {
                 ProviderError::ParseError("Missing content in OpenAI response".to_string())
             })
+    }
+
+    pub async fn complete_stream(
+        &self,
+        prompt: &str,
+        model: &str,
+        _api_key: &str,
+    ) -> ProviderResult<Pin<Box<dyn Stream<Item = ProviderResult<String>> + Send>>> {
+        let user_message = ChatCompletionRequestUserMessageArgs::default()
+            .content(prompt)
+            .build()
+            .map_err(|e| ProviderError::ConfigError(format!("Failed to build message: {}", e)))?;
+
+        let request = CreateChatCompletionRequestArgs::default()
+            .model(model)
+            .messages([user_message.into()])
+            .temperature(0.7)
+            .max_tokens(1024u32)
+            .build()
+            .map_err(|e| ProviderError::ConfigError(format!("Failed to build request: {}", e)))?;
+
+        let stream = self
+            .client
+            .chat()
+            .create_stream(request)
+            .await
+            .map_err(|e| map_openai_error(e))?;
+
+        let boxed_stream = Box::pin(
+            futures::stream::unfold(stream, |mut stream| async move {
+                match futures::StreamExt::next(&mut stream).await {
+                    Some(Ok(response)) => {
+                        let content = response
+                            .choices
+                            .first()
+                            .and_then(|choice| choice.delta.content.as_ref())
+                            .map(|s| s.to_string());
+
+                        match content {
+                            Some(text) => Some((Ok(text), stream)),
+                            None => Some((Ok(String::new()), stream)),
+                        }
+                    }
+                    Some(Err(e)) => Some((Err(map_openai_error(e)), stream)),
+                    None => None,
+                }
+            }),
+        );
+
+        Ok(boxed_stream)
+    }
+}
+
+fn map_openai_error(error: async_openai::error::OpenAIError) -> ProviderError {
+    use async_openai::error::OpenAIError;
+
+    match error {
+        OpenAIError::ApiError(api_err) => {
+            ProviderError::ApiError(format!("OpenAI API error: {}", api_err))
+        }
+        OpenAIError::Reqwest(req_err) => {
+            if req_err.is_timeout() {
+                ProviderError::NetworkError("OpenAI request timeout".to_string())
+            } else if req_err.is_connect() {
+                ProviderError::NetworkError("OpenAI connection error".to_string())
+            } else {
+                ProviderError::NetworkError(format!("OpenAI request error: {}", req_err))
+            }
+        }
+        OpenAIError::InvalidArgument(msg) => {
+            ProviderError::ConfigError(format!("OpenAI invalid argument: {}", msg))
+        }
+        OpenAIError::StreamError(msg) => {
+            ProviderError::ApiError(format!("OpenAI streaming error: {}", msg))
+        }
+        _ => ProviderError::ApiError(format!("OpenAI error: {}", error)),
     }
 }
 
@@ -75,65 +144,23 @@ mod tests {
     }
 
     #[test]
-    fn test_openai_http_client_build_request_payload() {
-        let client = OpenAiHttpClient::new("https://api.openai.com/v1".to_string()).unwrap();
-        let payload = client.build_request_payload("test prompt", "gpt-4");
-
-        assert_eq!(payload["model"], "gpt-4");
-        assert_eq!(payload["messages"][0]["role"], "user");
-        assert_eq!(payload["messages"][0]["content"], "test prompt");
-        assert_eq!(payload["temperature"], 0.7);
-        assert_eq!(payload["max_tokens"], 1024);
-    }
-
-    #[test]
-    fn test_openai_http_client_parse_response_success() {
-        let client = OpenAiHttpClient::new("https://api.openai.com/v1".to_string()).unwrap();
-        let response = r#"{
-            "choices": [
-                {
-                    "message": {
-                        "content": "This is a test response"
-                    }
-                }
-            ]
-        }"#;
-
-        let result = client.parse_response(response);
+    fn test_openai_http_client_new_custom_base() {
+        let result = OpenAiHttpClient::new("https://custom.openai.com/v1".to_string());
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "This is a test response");
     }
 
     #[test]
-    fn test_openai_http_client_parse_response_missing_content() {
-        let client = OpenAiHttpClient::new("https://api.openai.com/v1".to_string()).unwrap();
-        let response = r#"{
-            "choices": [
-                {
-                    "message": {}
-                }
-            ]
-        }"#;
+    fn test_map_openai_error_api_error() {
+        let error = async_openai::error::OpenAIError::InvalidArgument(
+            "test error".to_string(),
+        );
 
-        let result = client.parse_response(response);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_openai_http_client_parse_response_invalid_json() {
-        let client = OpenAiHttpClient::new("https://api.openai.com/v1".to_string()).unwrap();
-        let response = "invalid json";
-
-        let result = client.parse_response(response);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_openai_http_client_with_http_client() {
-        let client = OpenAiHttpClient::new("https://api.openai.com/v1".to_string()).unwrap();
-        let new_http_client = HttpClient::new(Duration::from_secs(60), Default::default()).unwrap();
-        let updated = client.with_http_client(new_http_client);
-
-        assert_eq!(updated.http_client.timeout(), Duration::from_secs(60));
+        let provider_error = map_openai_error(error);
+        match provider_error {
+            ProviderError::ConfigError(msg) => {
+                assert!(msg.contains("OpenAI invalid argument"));
+            }
+            _ => panic!("Expected ConfigError"),
+        }
     }
 }

@@ -1,65 +1,113 @@
-use crate::http::client::HttpClient;
+use anthropic_rust::{
+    client::Client,
+    types::{ContentBlock, Model},
+};
 use crate::providers::error::{ProviderError, ProviderResult};
-use serde_json::{json, Value};
-use std::time::Duration;
+use futures::Stream;
+use std::pin::Pin;
 
 pub struct AnthropicHttpClient {
-    http_client: HttpClient,
-    api_base: String,
+    client: Client,
 }
 
 impl AnthropicHttpClient {
-    pub fn new(api_base: String) -> ProviderResult<Self> {
-        let http_client = HttpClient::new(Duration::from_secs(30), Default::default())?;
-        Ok(AnthropicHttpClient {
-            http_client,
-            api_base,
-        })
-    }
+    pub fn new(_api_base: String) -> ProviderResult<Self> {
+        let client = Client::builder()
+            .api_key("sk-ant-test-key")
+            .model(Model::Claude35Sonnet20241022)
+            .build()
+            .map_err(|e| ProviderError::ConfigError(format!("Failed to create Anthropic client: {}", e)))?;
 
-    pub fn with_http_client(mut self, http_client: HttpClient) -> Self {
-        self.http_client = http_client;
-        self
+        Ok(AnthropicHttpClient { client })
     }
 
     pub async fn complete(
         &self,
         prompt: &str,
-        model: &str,
-        api_key: &str,
+        _model: &str,
+        _api_key: &str,
     ) -> ProviderResult<String> {
-        let request_body = self.build_request_payload(prompt, model);
-        let url = format!("{}/messages", self.api_base);
+        let request = self
+            .client
+            .chat_builder()
+            .user_message(ContentBlock::text(prompt.to_string()))
+            .build();
 
-        let response_text = self.http_client.post(&url, request_body, api_key).await?;
+        let response = self
+            .client
+            .execute_chat(request)
+            .await
+            .map_err(|e| map_anthropic_error(e))?;
 
-        self.parse_response(&response_text)
-    }
-
-    fn build_request_payload(&self, prompt: &str, model: &str) -> Value {
-        json!({
-            "model": model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
+        response
+            .content
+            .first()
+            .and_then(|block| {
+                if let ContentBlock::Text { text, .. } = block {
+                    Some(text.clone())
+                } else {
+                    None
                 }
-            ],
-            "max_tokens": 1024
-        })
-    }
-
-    fn parse_response(&self, response_text: &str) -> ProviderResult<String> {
-        let response: Value = serde_json::from_str(response_text).map_err(|e| {
-            ProviderError::ParseError(format!("Failed to parse Anthropic response: {}", e))
-        })?;
-
-        response["content"][0]["text"]
-            .as_str()
-            .map(|s| s.to_string())
+            })
             .ok_or_else(|| {
                 ProviderError::ParseError("Missing text in Anthropic response".to_string())
             })
+    }
+
+    pub async fn complete_stream(
+        &self,
+        prompt: &str,
+        _model: &str,
+        _api_key: &str,
+    ) -> ProviderResult<Pin<Box<dyn Stream<Item = ProviderResult<String>> + Send>>> {
+        let request = self
+            .client
+            .chat_builder()
+            .user_message(ContentBlock::text(prompt.to_string()))
+            .build();
+
+        let stream = self
+            .client
+            .stream_chat(request)
+            .await
+            .map_err(|e| map_anthropic_error(e))?;
+
+        let boxed_stream = Box::pin(
+            futures::stream::unfold(stream, |mut stream| async move {
+                match futures::StreamExt::next(&mut stream).await {
+                    Some(Ok(event)) => {
+                        use anthropic_rust::StreamEvent;
+                        use anthropic_rust::ContentDelta;
+
+                        match event {
+                            StreamEvent::ContentBlockDelta { delta, .. } => {
+                                match delta {
+                                    ContentDelta::TextDelta { text } => {
+                                        Some((Ok(text), stream))
+                                    }
+                                }
+                            }
+                            _ => Some((Ok(String::new()), stream)),
+                        }
+                    }
+                    Some(Err(e)) => Some((Err(map_anthropic_error(e)), stream)),
+                    None => None,
+                }
+            }),
+        );
+
+        Ok(boxed_stream)
+    }
+}
+
+fn map_anthropic_error(error: anthropic_rust::Error) -> ProviderError {
+    let error_msg = error.to_string();
+    if error_msg.contains("connection") || error_msg.contains("timeout") {
+        ProviderError::NetworkError(format!("Anthropic connection error: {}", error_msg))
+    } else if error_msg.contains("401") || error_msg.contains("403") {
+        ProviderError::ConfigError(format!("Anthropic authentication error: {}", error_msg))
+    } else {
+        ProviderError::ApiError(format!("Anthropic API error: {}", error_msg))
     }
 }
 
@@ -74,63 +122,32 @@ mod tests {
     }
 
     #[test]
-    fn test_anthropic_http_client_build_request_payload() {
-        let client = AnthropicHttpClient::new("https://api.anthropic.com/v1".to_string()).unwrap();
-        let payload = client.build_request_payload("test prompt", "claude-3-sonnet");
-
-        assert_eq!(payload["model"], "claude-3-sonnet");
-        assert_eq!(payload["messages"][0]["role"], "user");
-        assert_eq!(payload["messages"][0]["content"], "test prompt");
-        assert_eq!(payload["max_tokens"], 1024);
-    }
-
-    #[test]
-    fn test_anthropic_http_client_parse_response_success() {
-        let client = AnthropicHttpClient::new("https://api.anthropic.com/v1".to_string()).unwrap();
-        let response = r#"{
-            "content": [
-                {
-                    "type": "text",
-                    "text": "This is a test response"
-                }
-            ]
-        }"#;
-
-        let result = client.parse_response(response);
+    fn test_anthropic_http_client_new_custom_base() {
+        let result = AnthropicHttpClient::new("https://custom.anthropic.com/v1".to_string());
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "This is a test response");
     }
 
     #[test]
-    fn test_anthropic_http_client_parse_response_missing_text() {
-        let client = AnthropicHttpClient::new("https://api.anthropic.com/v1".to_string()).unwrap();
-        let response = r#"{
-            "content": [
-                {
-                    "type": "text"
-                }
-            ]
-        }"#;
-
-        let result = client.parse_response(response);
-        assert!(result.is_err());
+    fn test_map_anthropic_error_network() {
+        let error = anthropic_rust::Error::Network("connection failed".to_string());
+        let provider_error = map_anthropic_error(error);
+        match provider_error {
+            ProviderError::NetworkError(msg) => {
+                assert!(msg.contains("Anthropic connection error"));
+            }
+            _ => panic!("Expected NetworkError"),
+        }
     }
 
     #[test]
-    fn test_anthropic_http_client_parse_response_invalid_json() {
-        let client = AnthropicHttpClient::new("https://api.anthropic.com/v1".to_string()).unwrap();
-        let response = "invalid json";
-
-        let result = client.parse_response(response);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_anthropic_http_client_with_http_client() {
-        let client = AnthropicHttpClient::new("https://api.anthropic.com/v1".to_string()).unwrap();
-        let new_http_client = HttpClient::new(Duration::from_secs(60), Default::default()).unwrap();
-        let updated = client.with_http_client(new_http_client);
-
-        assert_eq!(updated.http_client.timeout(), Duration::from_secs(60));
+    fn test_map_anthropic_error_config() {
+        let error = anthropic_rust::Error::Config("Config error".to_string());
+        let provider_error = map_anthropic_error(error);
+        match provider_error {
+            ProviderError::ApiError(msg) => {
+                assert!(msg.contains("Anthropic API error"));
+            }
+            _ => panic!("Expected ApiError for config error"),
+        }
     }
 }

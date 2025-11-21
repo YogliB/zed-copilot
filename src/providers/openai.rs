@@ -1,6 +1,8 @@
 use crate::http::openai::OpenAiHttpClient;
 use crate::providers::error::{ProviderError, ProviderResult};
 use crate::providers::trait_def::AiProvider;
+use futures::Stream;
+use std::pin::Pin;
 
 pub struct OpenAiProvider {
     api_key: String,
@@ -65,6 +67,21 @@ impl AiProvider for OpenAiProvider {
 
     fn model(&self) -> &str {
         &self.model
+    }
+
+    async fn complete_stream(
+        &self,
+        prompt: &str,
+    ) -> ProviderResult<Pin<Box<dyn Stream<Item = ProviderResult<String>> + Send>>> {
+        if prompt.is_empty() {
+            return Err(ProviderError::ApiError(
+                "Prompt cannot be empty".to_string(),
+            ));
+        }
+
+        self.http_client
+            .complete_stream(prompt, &self.model, &self.api_key)
+            .await
     }
 }
 
