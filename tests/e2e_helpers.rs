@@ -10,10 +10,12 @@ impl E2ETestContext {
         Self { mock_server }
     }
 
+    #[allow(dead_code)]
     pub fn openai_base_url(&self) -> String {
         self.mock_server.uri()
     }
 
+    #[allow(dead_code)]
     pub fn anthropic_base_url(&self) -> String {
         self.mock_server.uri()
     }
