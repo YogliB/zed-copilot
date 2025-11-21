@@ -45,7 +45,7 @@ For detailed timeline, see [ROADMAP.md](../docs/ROADMAP.md).
 - WASM build validation disabled in `scripts/smart-test.sh` with clear rationale
 - All 93 tests pass in both debug and release modes
 
-## [0.1.0-alpha] - 2024-11-20
+## [0.1.0-alpha] - 2025-11-20
 
 ### Added
 - Abstract `AiProvider` trait for multi-provider support
@@ -68,7 +68,7 @@ For detailed timeline, see [ROADMAP.md](../docs/ROADMAP.md).
 - Trait-based design ready for additional providers (Ollama, Cohere, etc.)
 - All tests passing with 100% success rate
 
-## [0.0.1] - 2024-11-19
+## [0.0.1] - 2025-11-19
 
 ### Added
 - Initial project scaffolding
@@ -115,5 +115,5 @@ When releasing a new version:
 
 ---
 
-**Last Updated:** November 19, 2024
+**Last Updated:** November 19, 2025
 **Current Version:** 0.0.1

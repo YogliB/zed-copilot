@@ -10,7 +10,7 @@ Technical decisions and trade-offs made during Zed Copilot development.
 
 **Decision:** Build Zed Copilot as a **native Rust cdylib extension**, not a WebAssembly module.
 
-**Date:** 2024-11 (Phase 2 implementation)
+**Date:** 2025-11 (Phase 2 implementation)
 
 **Status:** ✅ Confirmed
 

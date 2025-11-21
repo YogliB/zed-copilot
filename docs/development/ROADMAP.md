@@ -467,7 +467,7 @@ This roadmap may be adjusted based on:
 - Technical discoveries
 - Resource constraints
 
-**Recent Change (November 2024):**
+**Recent Change (November 2025):**
 - **MAJOR:** Repositioned chat as Phase 3 (primary feature)
 - Code completions moved to Phase 4 (optional feature)
 - Rationale: Chat is the primary user-facing feature; completions are secondary
@@ -489,7 +489,7 @@ Updates will be communicated via:
 
 ---
 
-**Last Updated:** November 2024
+**Last Updated:** November 2025
 **Current Phase:** 2 (AI Provider Integration) — Phase 2.2 Complete ✅
 **Next Phase:** 2.3 (HTTP Integration & Streaming)
 **Primary Feature:** Chat Interface (Phase 3)

@@ -254,5 +254,5 @@ Use `.PHONY` to mark targets that don't create files.
 
 ---
 
-**Last Updated:** 2024  
+**Last Updated:** 2025  
 **Related:** `DEVELOPMENT.md`, `.github/CONTRIBUTING.md`

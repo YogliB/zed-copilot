@@ -527,7 +527,7 @@ The Zed extension API cannot be fully tested in isolation:
 
 ---
 
-**Last Updated:** 2024  
+**Last Updated:** 2025  
 **Maintained by:** Zed Copilot Contributors
 
 ---
