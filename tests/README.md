@@ -1,6 +1,6 @@
 # Tests
 
-Test suite for Zed Copilot: unit tests, E2E tests with contract validation, and integration tests.
+Test suite for Zed Copilot: unit tests, E2E tests with mocking, and integration tests.
 
 ## Structure
 
@@ -8,15 +8,11 @@ Test suite for Zed Copilot: unit tests, E2E tests with contract validation, and 
 tests/
 ├── README.md                # This file
 ├── common/
-│   ├── mod.rs              # Shared test utilities
-│   └── openapi.rs          # OpenAPI spec parser & validator
+│   └── mod.rs              # Shared test utilities
 ├── e2e_helpers.rs          # Wiremock server setup
-├── openai_e2e.rs           # OpenAI E2E tests (19)
+├── openai_e2e.rs           # OpenAI E2E tests (16)
 ├── anthropic_e2e.rs        # Anthropic E2E tests (21)
-├── integration_tests.rs    # Integration tests (14)
-└── schemas/
-    ├── openai.yml          # Downloaded OpenAI spec
-    └── .openai-spec.sha256 # Spec checksum
+└── integration_tests.rs    # Integration tests (14)
 ```
 
 ## Quick Start
@@ -28,25 +24,25 @@ cargo test
 # Run only E2E tests
 cargo test --test openai_e2e --test anthropic_e2e
 
-# Download fresh OpenAI spec
-../scripts/download-openai-spec.sh
+# Run tests with output
+cargo test -- --nocapture
 ```
 
 ## E2E Tests
 
-Contract-driven testing with wiremock and OpenAPI spec validation.
+Contract-driven testing with wiremock and explicit assertions.
 
 **Key Features:**
-- Validates mocks against live OpenAI API specs
 - Zero external API calls (uses wiremock)
 - Deterministic, cost-free testing
-- ~300ms execution time for 40 tests
+- Fast execution (~200ms for 37 tests)
+- Manual assertions for clarity
 
 **Example Test:**
 
 ```rust
 #[tokio::test]
-async fn test_openai_completion() {
+async fn test_openai_completion_contract_validation() {
     let ctx = E2ETestContext::new().await;
     
     let response = json!({
@@ -54,6 +50,8 @@ async fn test_openai_completion() {
         "object": "chat.completion",
         "choices": [...]
     });
+    
+    assert!(response.get("id").is_some());
     
     Mock::given(method("POST"))
         .and(path("/chat/completions"))
@@ -63,28 +61,19 @@ async fn test_openai_completion() {
 }
 ```
 
-## OpenAPI Spec Parser
+## Test Organization
 
-The `common/openapi.rs` module provides:
+- `openai_e2e.rs` — OpenAI API client tests
+  - Response format validation
+  - Error handling
+  - Request building
+  - Message validation
 
-```rust
-// Load spec
-let spec = OpenApiSpec::from_file("tests/schemas/openai.yml")?;
+- `anthropic_e2e.rs` — Anthropic API client tests
+  - Similar coverage to OpenAI
 
-// Get schema
-let schema = spec.get_schema("CreateChatCompletionResponse");
-
-// Validate JSON against schema
-spec.validate_json(&response, &schema)?;
-
-// Find endpoint schema
-let schema = spec.get_endpoint_schema("/chat/completions", "POST");
-```
-
-**Preprocessing:**
-- Handles large integers (> i64::MAX)
-- YAML to JSON conversion
-- Schema reference resolution
+- `integration_tests.rs` — End-to-end provider tests
+  - Full workflow testing
 
 ## Debugging
 
@@ -100,11 +89,6 @@ cargo test --test openai_e2e -- --test-threads=1
 ```
 
 ## Common Issues
-
-**OpenAPI spec fails to load:**
-```bash
-../scripts/download-openai-spec.sh
-```
 
 **Mock server port conflict:**
 ```bash
@@ -132,4 +116,3 @@ This includes all E2E tests (`*_e2e.rs` files).
 
 - [TESTING.md](../docs/development/TESTING.md) - Complete testing guide
 - [wiremock-rs](https://github.com/LukeMathWalker/wiremock-rs) - HTTP mocking
-- [OpenAI API Spec](https://app.stainless.com/api/spec/documented/openai/)

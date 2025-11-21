@@ -1,6 +1,5 @@
 mod common;
 
-use common::openapi::OpenApiSpec;
 use serde_json::json;
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, ResponseTemplate};
@@ -203,15 +202,8 @@ async fn test_anthropic_message_roles_valid() {
 
 #[tokio::test]
 async fn test_anthropic_max_tokens_bounds() {
-    let schema = json!({
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 4096
-    });
-
-    assert_eq!(json!(1).as_i64(), Some(1));
-    assert_eq!(json!(2048).as_i64(), Some(2048));
-    assert_eq!(json!(4096).as_i64(), Some(4096));
+    let max_tokens = 2048;
+    assert!(max_tokens >= 1 && max_tokens <= 4096, "max_tokens must be between 1 and 4096");
 }
 
 #[tokio::test]

@@ -1,5 +1,3 @@
-pub mod openapi;
-
 pub struct TestContext {
     pub extension_name: String,
 }

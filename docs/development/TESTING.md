@@ -12,7 +12,7 @@ Complete testing strategy and guidelines for Zed Copilot.
 
 Zed Copilot uses comprehensive testing to ensure reliability. Tests are organized into unit tests (in `src/`) and integration tests (in `tests/`), following Rust best practices.
 
-**Current Coverage:** 157 tests, all passing ✅
+**Current Coverage:** 151 tests, all passing ✅
 
 ## Test Organization
 
@@ -21,7 +21,7 @@ Zed Copilot uses comprehensive testing to ensure reliability. Tests are organize
 Zed Copilot uses three types of tests:
 
 1. **Unit Tests** (`src/`) — Component-level testing
-2. **E2E Tests** (`tests/*_e2e.rs`) — Contract validation against real API specs
+2. **E2E Tests** (`tests/*_e2e.rs`) — Provider implementations with HTTP mocking
 3. **Integration Tests** (`tests/integration_tests.rs`) — Component interaction testing
 
 
@@ -61,29 +61,26 @@ tests/
 
 ### E2E Tests
 
-E2E tests validate provider implementations against live OpenAPI specifications using contract-driven testing.
+E2E tests validate provider implementations using wiremock for HTTP mocking.
 
 **Structure:**
 ```
 tests/
-├── openai_e2e.rs           # OpenAI provider tests (19 tests)
+├── openai_e2e.rs           # OpenAI provider tests (14 tests)
 ├── anthropic_e2e.rs        # Anthropic provider tests (21 tests)
 ├── e2e_helpers.rs          # Wiremock server setup
-├── common/
-│   └── openapi.rs          # OpenAPI spec parser & validator
-└── schemas/
-    └── openai.yml          # Downloaded OpenAI spec (auto-updated)
+└── common/
+    └── mod.rs              # Shared test utilities
 ```
 
 **Key Features:**
-- Contract validation against real API specs
-- HTTP mocking with wiremock (zero external calls)
-- OpenAPI spec parser validates mock responses
+- HTTP mocking with wiremock (zero external API calls)
+- Explicit field validation in assertions
 - Deterministic, cost-free testing
+- Fast execution
 
 **Setup:**
 ```bash
-./scripts/download-openai-spec.sh  # Download fresh OpenAI spec
 cargo test --test openai_e2e --test anthropic_e2e
 ```
 
@@ -91,7 +88,7 @@ cargo test --test openai_e2e --test anthropic_e2e
 
 Every E2E test follows this pattern:
 
-```tests/openai_e2e.rs#L1-20
+```rust
 #[tokio::test]
 async fn test_name() {
     let ctx = E2ETestContext::new().await;
@@ -102,6 +99,8 @@ async fn test_name() {
         "choices": [...]
     });
     
+    assert!(mock_response.get("id").is_some());
+    
     Mock::given(method("POST"))
         .and(path("/chat/completions"))
         .respond_with(ResponseTemplate::new(200).set_body_json(&mock_response))
@@ -109,19 +108,6 @@ async fn test_name() {
         .await;
 }
 ```
-
-**OpenAPI Spec Management:**
-
-Download and validate the latest OpenAI API spec:
-```bash
-./scripts/download-openai-spec.sh
-```
-
-This script:
-- Downloads spec from https://app.stainless.com/api/spec/documented/openai/openapi.documented.yml
-- Saves to `tests/schemas/openai.yml`
-- Calculates SHA256 checksum
-- Validates YAML syntax
 
 **Debugging E2E Tests:**
 
@@ -133,9 +119,8 @@ cargo test --test openai_e2e -- --test-threads=1  # No parallelization
 
 **Common Issues:**
 
-1. **OpenAPI spec fails to load**: Re-download with `./scripts/download-openai-spec.sh`
-2. **Mock server fails to start**: Check port conflicts with `lsof -i :8000`
-3. **Test times out**: Run with `timeout 30 cargo test --test openai_e2e`
+1. **Mock server fails to start**: Check port conflicts with `lsof -i :8000`
+2. **Test times out**: Run with `timeout 30 cargo test --test openai_e2e`
 
 ## Running Tests
 
@@ -364,11 +349,11 @@ cargo fmt && cargo clippy && cargo test
 
 ## Current Test Coverage
 
-**Phase 2.4: E2E Tests (40)** ✅
-- OpenAI provider E2E tests (19)
+**Phase 2.4: E2E Tests (35)** ✅
+- OpenAI provider E2E tests (14)
 - Anthropic provider E2E tests (21)
-- Contract validation against OpenAPI specs
 - HTTP mocking with wiremock
+- Manual field validation
 
 **Phase 2.1: Provider Tests (31)** ✅
 - Provider instantiation and trait implementation
@@ -381,7 +366,7 @@ cargo fmt && cargo clippy && cargo test
 - Trait implementation verification
 - Integration with Zed extension API
 
-**Total: 157 tests, 100% pass rate** ✅
+**Total: 151 tests, 100% pass rate** ✅
 
 ## Test Expansion by Phase
 

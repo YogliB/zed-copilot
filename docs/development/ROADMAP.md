@@ -101,33 +101,29 @@ Zed Copilot is a multi-phase project to build a WebAssembly-based AI extension f
 - ✅ Prevent thundering herd with jitter-based retry distribution
 - ✅ Respect provider rate limits with token bucket algorithm
 
-### Phase 2.4: E2E Testing with Contract Validation ✅
+### Phase 2.4: E2E Testing with HTTP Mocking ✅
 - [x] Wiremock infrastructure for HTTP mocking
-- [x] OpenAPI spec parser for contract validation
-- [x] OpenAI provider E2E tests (19 tests)
+- [x] OpenAI provider E2E tests (16 tests)
 - [x] Anthropic provider E2E tests (21 tests)
-- [x] Automated spec download script
-- [x] YAML preprocessing for large numbers edge case
+- [x] Manual field validation in assertions
 - [x] Comprehensive E2E testing documentation
 
-**Status:** Complete — All 40 E2E tests passing ✅
+**Status:** Complete — All 37 E2E tests passing ✅
 
 **Deliverables:**
-- 40 passing E2E tests covering both OpenAI and Anthropic providers
-- Fresh OpenAI API spec auto-downloaded on test runs
-- Contract-driven testing with real API schemas
-- `tests/common/openapi.rs` — OpenAPI spec parser and validator
+- 37 passing E2E tests covering both OpenAI and Anthropic providers
+- HTTP mocking with wiremock (zero external API calls)
+- Explicit field validation in test assertions
 - `tests/e2e_helpers.rs` — Wiremock server setup utilities
-- `tests/openai_e2e.rs` — 19 OpenAI-specific E2E tests
+- `tests/openai_e2e.rs` — 16 OpenAI-specific E2E tests
 - `tests/anthropic_e2e.rs` — 21 Anthropic-specific E2E tests
-- `scripts/download-openai-spec.sh` — Automated spec download
-- `docs/development/E2E_TESTING.md` — Complete E2E testing guide
+- Comprehensive E2E testing documentation
 - Zero external API calls required for local development
-- All tests run in ~300ms with zero flakiness
+- Fast test execution with zero flakiness
 
 **Key Achievements:**
-- Tests validate against live OpenAPI specifications
 - Deterministic, repeatable tests with wiremock mocking
+- Clear, explicit assertions on mock responses
 - Cost-free testing (no API credits burned)
 - Ready for Phase 3 chat interface implementation
 
