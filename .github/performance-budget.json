@@ -1,0 +1,97 @@
+{
+  "version": "1.0",
+  "description": "Test performance budgets for zed-copilot. Alerts triggered if thresholds exceeded.",
+  "lastUpdated": "2025-01-15",
+  "budgets": {
+    "unitTests": {
+      "category": "Unit Tests (inline #[test])",
+      "totalBudgetMs": 1400,
+      "perTestBudgetMs": 50,
+      "expectedCount": 93,
+      "rationale": "Fast in-memory tests with no I/O"
+    },
+    "integrationTests": {
+      "category": "Integration Tests (tests/integration_tests.rs)",
+      "totalBudgetMs": 900,
+      "perTestBudgetMs": 100,
+      "expectedCount": 9,
+      "rationale": "Tests with fixture setup but no external services"
+    },
+    "e2eTests": {
+      "category": "E2E Tests (tests/*_e2e.rs)",
+      "totalBudgetMs": 720,
+      "perTestBudgetMs": 500,
+      "expectedCount": 12,
+      "rationale": "Mock HTTP server tests, no real API calls"
+    },
+    "fullSuite": {
+      "category": "Full Test Suite (all categories)",
+      "totalBudgetMs": 3000,
+      "description": "Total wall-clock time including compilation",
+      "rationale": "Allow variance in compilation times"
+    }
+  },
+  "regressionThresholds": {
+    "alertOnIncreasePercent": 15,
+    "blockOnIncreasePercent": 25,
+    "description": "Alert at 15% increase, block merge at 25% increase"
+  },
+  "slowTestThresholds": {
+    "unitTest": {
+      "warningMs": 25,
+      "criticalMs": 50,
+      "description": "Individual unit test thresholds"
+    },
+    "integrationTest": {
+      "warningMs": 50,
+      "criticalMs": 100,
+      "description": "Individual integration test thresholds"
+    },
+    "e2eTest": {
+      "warningMs": 250,
+      "criticalMs": 500,
+      "description": "Individual E2E test thresholds"
+    }
+  },
+  "rules": {
+    "parallelExecution": {
+      "enabled": true,
+      "description": "Tests run in parallel by default"
+    },
+    "allowedSlowTests": {
+      "exemptions": [
+        "test_extension_compiles_and_loads"
+      ],
+      "description": "Tests that are expected to be slower (e.g., full compilation/loading)"
+    },
+    "compilationOverhead": {
+      "expectedMs": 1200,
+      "description": "Expected compilation time before tests run; not counted against test budget"
+    }
+  },
+  "monitoring": {
+    "storeMetrics": true,
+    "metricsPath": ".github/test-metrics/",
+    "createReport": true,
+    "commentOnPR": true,
+    "alertOnRegression": true,
+    "weeklyReview": true
+  },
+  "baseline": {
+    "date": "2025-01-15",
+    "unitTestsMs": 980,
+    "integrationTestsMs": 690,
+    "e2eTestsMs": 540,
+    "totalMs": 2210,
+    "testCount": 114,
+    "environment": "macOS M-series"
+  },
+  "notes": [
+    "Baseline includes: 93 unit tests, 9 integration tests, 12 E2E tests",
+    "All tests use mocks; no external API calls",
+    "Tests run in parallel unless specified otherwise",
+    "Compilation overhead (~1.2s) is expected and not counted against budgets",
+    "Individual slow test exemptions listed in allowedSlowTests",
+    "Monthly reviews recommended to adjust budgets as codebase grows"
+  ]
+}
