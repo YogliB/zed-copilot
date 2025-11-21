@@ -141,7 +141,10 @@ bash scripts/setup-hooks.sh
 This installs **pre-commit** and **pre-push** hooks that:
 - Validate code formatting and linting on commit (fast, ~5-10 sec)
 - Run smart tests on push (only for changed modules, ~20-45 sec)
+- **Skip WASM validation** (this is a native cdylib extension, not WASM)
 - Prevent test failures from reaching CI
+
+**Note:** WASM validation is intentionally skipped because this project uses native-only HTTP dependencies (tokio, reqwest, async-openai, anthropic_rust) that are incompatible with WASM targets. The project is built as a `cdylib` for Zed, not as a WebAssembly module.
 
 Hooks are optional but **highly recommended** to catch issues early. See [GIT_HOOKS.md](GIT_HOOKS.md) for details.
 
@@ -180,9 +183,11 @@ make check-all
 This runs:
 - `cargo fmt` — Code formatting
 - `cargo clippy` — Linting and warnings
-- `cargo test` — All tests
+- `cargo test` — All native tests (93 tests)
 
 **Note:** If you have git hooks installed, `cargo fmt` and `cargo clippy` checks are enforced automatically on commit. You can also run `scripts/smart-test.sh` to preview what tests will run on push.
+
+**WASM builds are not required** — This project uses native-only dependencies and is built as a `cdylib`, not WebAssembly.
 
 **Fix any issues before committing.**
 

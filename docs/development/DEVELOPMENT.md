@@ -8,7 +8,9 @@ Complete guide for developers working on Zed Copilot.
 
 ## Architecture Overview
 
-Zed Copilot is a WebAssembly-based AI extension for Zed IDE built in Rust. The primary feature is interactive chat with AI (Phase 3), with GitHub Copilot LSP integration for code completions planned for Phase 4.
+Zed Copilot is a native Rust extension for Zed IDE built as a cdylib. The primary feature is interactive chat with AI (Phase 3), with GitHub Copilot LSP integration for code completions planned for Phase 4.
+
+**Note:** This is a **native extension** (`cdylib`), not a WebAssembly module. It uses async HTTP dependencies (tokio, reqwest, async-openai, anthropic_rust) that require native features incompatible with WASM targets.
 
 ### Core Components
 
@@ -16,7 +18,7 @@ Zed Copilot is a WebAssembly-based AI extension for Zed IDE built in Rust. The p
 ┌─────────────────────────────────────────────────┐
 │           Zed IDE (Host)                        │
 ├─────────────────────────────────────────────────┤
-│  Zed Copilot Extension (WebAssembly)            │
+│  Zed Copilot Extension (Native cdylib)          │
 │  ┌──────────────────────────────────────────┐   │
 │  │ ZedCopilot (Extension)                   │   │
 │  ├── AI Provider Manager (Phase 2.1) ✅     │   │
@@ -46,7 +48,7 @@ Zed Copilot is a WebAssembly-based AI extension for Zed IDE built in Rust. The p
 ```
 zed-copilot/
 ├── extension.toml              # Zed extension metadata
-├── Cargo.toml                  # Rust dependencies and build config
+├── Cargo.toml                  # Rust dependencies (cdylib, native-only deps)
 ├── src/
 │   ├── lib.rs                  # Main extension + unit tests
 │   ├── providers/              # AI provider abstraction (Phase 2.1 ✅)
@@ -306,6 +308,17 @@ make check-all
 
 ## Architecture Principles
 
+### Native Extension Design
+
+This project is built as a native Rust cdylib extension, not a WebAssembly module. This design choice enables:
+
+- **Async HTTP Support** — Direct use of tokio and reqwest for real AI provider calls
+- **Full SDK Access** — Native async-openai and anthropic_rust SDKs without polyfills
+- **Performance** — Native code execution without WASM overhead
+- **Feature Compatibility** — Access to all Rust ecosystem features
+
+**Trade-off:** WASM portability is sacrificed for functionality. WASM validation is intentionally skipped in the test suite.
+
 ### Trait-Based Abstraction (Phase 2.1 ✅)
 
 Providers implement `AiProvider` trait, enabling:
@@ -351,8 +364,10 @@ pub trait AiProvider: Send + Sync {
 
 ## Performance Considerations
 
-- **Async I/O:** Non-blocking provider calls prevent UI freezing
-- **Streaming:** Phase 2.3 will stream responses for real-time UX
+- **Native Execution:** cdylib provides optimal performance without WASM overhead
+- **Async I/O:** Non-blocking provider calls prevent UI freezing via tokio
+- **HTTP Pooling:** reqwest manages connection pooling automatically
+- **Streaming:** Phase 2.3 complete — streams responses for real-time UX
 - **Lazy Loading:** Providers instantiated only when needed
 - **Caching:** Future phases will add request caching
 
@@ -362,6 +377,8 @@ pub trait AiProvider: Send + Sync {
 - **Environment Variable Interpolation:** Settings use `${VARIABLE_NAME}` pattern
 - **Per-Provider Configuration:** Each provider manages its own credentials
 - **Input Validation:** All user input validated before use
+- **HTTPS Only:** All provider calls use TLS via reqwest
+- **Native Security:** Benefits from OS-level security features (not sandboxed WASM)
 
 ## Code Standards
 

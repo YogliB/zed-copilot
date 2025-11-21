@@ -32,8 +32,10 @@ git commit → Pre-commit (fmt + clippy, ~5-10s)
 git push   → Pre-push (smart tests, ~20-45s)
              ├─ Detect changed modules
              ├─ Run targeted tests
-             └─ Validate WASM build
+             └─ Skip WASM validation (native cdylib)
 ```
+
+**Note:** WASM validation is intentionally skipped because this project is a native cdylib extension using HTTP dependencies (tokio, reqwest, async-openai, anthropic_rust) that are incompatible with WASM targets.
 
 ## Quick Start
 
@@ -118,7 +120,7 @@ Uses **intelligent test filtering** (--changed-only mode) to:
 1. Detect which modules you've modified
 2. Run tests only for those modules
 3. Fall back to full suite if dependencies or config changes
-4. Validate WASM compilation
+4. **Skip WASM validation** (native extension with WASM-incompatible dependencies)
 
 **Smart fallback conditions:**
 - Cargo.toml or Cargo.lock changed → full suite
@@ -163,9 +165,9 @@ test http::retry::tests::test_backoff_respects_max_delay ... ok
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Running WASM Validation
 
-📋 Building WASM (release)...
-   Compiling zed-copilot v0.0.1
-✅ WASM build passed
+⚠️  Skipping WASM validation for native Zed extension (cdylib)
+📋 This project uses HTTP dependencies incompatible with WASM targets.
+📋 WASM validation is not applicable for native Zed extensions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ All Tests Passed! ✨
@@ -208,9 +210,9 @@ scripts/smart-test.sh full
 ```
 
 **Behavior:**
-- Runs complete native test suite
-- Runs WASM build validation
-- No filtering
+- Runs complete native test suite (93 tests)
+- Skips WASM validation (native cdylib extension)
+- No test filtering
 
 **When to use:**
 - Merging branches with multiple changes
@@ -256,8 +258,8 @@ git commit -m "Fix: Cap delay after jitter application"
 git push
 
 # Pre-push runs: Smart detection → found src/http/retry change
-# Runs: tests for http::retry module + WASM build
-# Time: ~25 seconds
+# Runs: tests for http::retry module (WASM validation skipped)
+# Time: ~20 seconds
 # Result: ✓ All tests pass, push succeeds
 ```
 
@@ -275,8 +277,8 @@ git push
 
 # Pre-push detects: Cargo.toml changed!
 # Triggers: FALLBACK to full suite
-# Runs: All native tests + WASM build
-# Time: ~45 seconds
+# Runs: All 93 native tests (WASM validation skipped)
+# Time: ~40 seconds
 # Result: ✓ All tests pass, push succeeds
 ```
 
@@ -288,7 +290,7 @@ scripts/smart-test.sh dry-run
 
 # Output:
 # Would run: Targeted native tests (changed modules)
-# Would run: WASM build validation
+# Would skip: WASM validation (native cdylib extension)
 # Dry-run complete (no tests executed)
 
 # Then run them for real
@@ -360,16 +362,13 @@ This runs full tests but doesn't bypass the hook—the hook still runs on push, 
 3. Run command manually: `cargo test` (outside hook)
 4. If manual fails, fix the error first, then retry commit/push
 
-### WASM target not installed
+### WASM-related messages
 
-**Problem:** "WASM target not installed" warning
+**Note:** WASM validation is intentionally skipped for this project.
 
-**Solution:**
-```bash
-rustup target add wasm32-unknown-unknown
-```
+**Why:** This is a native cdylib extension that uses HTTP dependencies (tokio, reqwest, async-openai, anthropic_rust) which are incompatible with WASM targets. The project is built as a `cdylib` for Zed IDE, not as a WebAssembly module.
 
-Then retry push.
+**Action:** No action needed. WASM validation skip is expected and correct.
 
 ### Hooks slow down my workflow
 

@@ -8,6 +8,18 @@ Deep technical dives into Zed Copilot's implementation details and architecture.
 
 ## 📖 Documents in This Folder
 
+### [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md)
+**Architecture decisions and trade-offs** — Key technical decisions made during development.
+
+Best for: Understanding why the project is structured as a native extension vs WASM.
+
+**Contains:**
+- Native cdylib vs WebAssembly decision
+- HTTP dependency requirements
+- WASM validation skip rationale
+- Trade-offs and alternatives considered
+- Future considerations
+
 ### [PROVIDER_INTEGRATION.md](PROVIDER_INTEGRATION.md)
 **AI provider implementation** — How Zed Copilot interfaces with AI providers.
 
@@ -81,6 +93,9 @@ Best for: Understanding error handling and retry mechanisms.
 
 ## 🎯 When to Read What
 
+### I want to understand why this is a native extension (not WASM)
+→ Read [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md)
+
 ### I want to understand the provider system
 → Read [PROVIDER_INTEGRATION.md](PROVIDER_INTEGRATION.md)
 
@@ -113,6 +128,8 @@ Best for: Understanding error handling and retry mechanisms.
 ## 🔗 Document Relationships
 
 ```
+ARCHITECTURE_DECISIONS.md ─→ DEVELOPMENT.md (native vs WASM)
+                          
 PROVIDER_INTEGRATION.md ──┐
                           ├─→ DEVELOPMENT.md (architecture)
                           │
@@ -198,6 +215,12 @@ See [HTTP_INTEGRATION.md](HTTP_INTEGRATION.md) for details.
 
 **Quick answer:** Server-Sent Events (SSE) streaming allows tokens to arrive in real-time instead of waiting for complete responses.
 
+### Why is WASM validation skipped?
+
+See [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md).
+
+**Quick answer:** This is a native cdylib extension using HTTP dependencies (tokio, reqwest, async-openai, anthropic_rust) that are incompatible with WASM targets. WASM validation skip is intentional and correct.
+
 ### Can I add a custom AI provider?
 
 Yes! See [PROVIDER_INTEGRATION.md](PROVIDER_INTEGRATION.md#creating-a-new-provider).
@@ -214,6 +237,7 @@ See [GH_COPILOT_LSP_INTEGRATION.md](GH_COPILOT_LSP_INTEGRATION.md).
 
 ## 🚀 Related Reading
 
+- **[ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md)** — Why native extension vs WASM
 - **[../development/DEVELOPMENT.md](../development/DEVELOPMENT.md)** — System architecture overview
 - **[../development/ROADMAP.md](../development/ROADMAP.md)** — Project phases and timeline
 - **[PROVIDER_INTEGRATION.md](PROVIDER_INTEGRATION.md)** — Start here for implementation details
