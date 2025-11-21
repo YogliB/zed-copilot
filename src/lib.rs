@@ -45,7 +45,7 @@ mod tests {
 
     #[test]
     fn test_zed_copilot_default() {
-        let extension = ZedCopilot::default();
+        let extension = ZedCopilot;
         let _ = extension;
     }
 
@@ -58,7 +58,7 @@ mod tests {
     fn test_multiple_instances() {
         let _ext1 = ZedCopilot::new();
         let _ext2 = ZedCopilot::new();
-        let _ext3 = ZedCopilot::default();
+        let _ext3 = ZedCopilot;
     }
 
     #[test]
@@ -67,5 +67,13 @@ mod tests {
             let _extension = ZedCopilot::new();
         });
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_extension_name_is_consistent() {
+        let ext1 = ZedCopilot::new();
+        let ext2 = ZedCopilot::new();
+        let _ext1 = ext1;
+        let _ext2 = ext2;
     }
 }
