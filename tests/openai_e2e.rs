@@ -4,13 +4,12 @@ use serde_json::json;
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-mod e2e_helpers;
 use common::get_openai_error_scenarios;
-use e2e_helpers::E2ETestContext;
+use common::E2ETestContext;
 
 #[tokio::test]
 async fn test_openai_completion_contract_validation() {
-    let ctx = E2ETestContext::new().await;
+    let mut ctx = E2ETestContext::new().await;
 
     let mock_response = json!({
         "id": "chatcmpl-8Lw9S6pWkB6aKGU5Q7KQZpzP",
@@ -47,10 +46,10 @@ async fn test_openai_completion_contract_validation() {
         .and(header("authorization", "Bearer sk-test-key"))
         .and(header("content-type", "application/json"))
         .respond_with(ResponseTemplate::new(200).set_body_json(&mock_response))
-        .mount(&ctx.mock_server)
+        .mount(ctx.mock_server_mut().await)
         .await;
 
-    assert!(!ctx.openai_base_url().is_empty());
+    assert!(!ctx.openai_base_url().await.is_empty());
 }
 
 #[tokio::test]
@@ -85,7 +84,7 @@ async fn test_openai_error_scenarios() {
     let scenarios = get_openai_error_scenarios();
 
     for scenario in scenarios {
-        let ctx = E2ETestContext::new().await;
+        let mut ctx = E2ETestContext::new().await;
 
         let body = (scenario.body_fn)();
         assert!(
@@ -107,11 +106,11 @@ async fn test_openai_error_scenarios() {
         Mock::given(method("POST"))
             .and(path("/v1/chat/completions"))
             .respond_with(ResponseTemplate::new(scenario.status).set_body_json(&body))
-            .mount(&ctx.mock_server)
+            .mount(ctx.mock_server_mut().await)
             .await;
 
         assert!(
-            !ctx.openai_base_url().is_empty(),
+            !ctx.openai_base_url().await.is_empty(),
             "Mock server should be available for scenario '{}'",
             scenario.name
         );
@@ -212,8 +211,8 @@ async fn test_openai_response_missing_required_fields() {
 
 #[tokio::test]
 async fn test_openai_mock_server_is_available() {
-    let ctx = E2ETestContext::new().await;
-    let url = ctx.openai_base_url();
+    let mut ctx = E2ETestContext::new().await;
+    let url = ctx.openai_base_url().await;
 
     assert!(!url.is_empty(), "Mock server URL should not be empty");
     assert!(

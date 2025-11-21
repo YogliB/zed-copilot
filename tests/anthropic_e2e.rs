@@ -4,12 +4,11 @@ use serde_json::json;
 use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, ResponseTemplate};
 
-mod e2e_helpers;
-use e2e_helpers::E2ETestContext;
+use common::E2ETestContext;
 
 #[tokio::test]
 async fn test_anthropic_completion_basic_structure() {
-    let ctx = E2ETestContext::new().await;
+    let mut ctx = E2ETestContext::new().await;
 
     let mock_response = json!({
         "id": "msg_1234567890",
@@ -42,15 +41,15 @@ async fn test_anthropic_completion_basic_structure() {
         .and(header("x-api-key", "sk-ant-test-key"))
         .and(header("content-type", "application/json"))
         .respond_with(ResponseTemplate::new(200).set_body_json(&mock_response))
-        .mount(&ctx.mock_server)
+        .mount(ctx.mock_server_mut().await)
         .await;
 
-    assert!(!ctx.anthropic_base_url().is_empty());
+    assert!(!ctx.anthropic_base_url().await.is_empty());
 }
 
 #[tokio::test]
 async fn test_anthropic_streaming_response_format() {
-    let ctx = E2ETestContext::new().await;
+    let mut ctx = E2ETestContext::new().await;
 
     let streaming_event = json!({
         "type": "content_block_delta",
@@ -72,15 +71,15 @@ async fn test_anthropic_streaming_response_format() {
         .respond_with(ResponseTemplate::new(200).set_body_string(
             "event: content_block_delta\ndata: {\"type\":\"content_block_delta\"}\n\n",
         ))
-        .mount(&ctx.mock_server)
+        .mount(ctx.mock_server_mut().await)
         .await;
 
-    assert!(!ctx.anthropic_base_url().is_empty());
+    assert!(!ctx.anthropic_base_url().await.is_empty());
 }
 
 #[tokio::test]
 async fn test_anthropic_error_response_format() {
-    let ctx = E2ETestContext::new().await;
+    let mut ctx = E2ETestContext::new().await;
 
     let error_response = json!({
         "type": "error",
@@ -98,15 +97,15 @@ async fn test_anthropic_error_response_format() {
     Mock::given(method("POST"))
         .and(path("/messages"))
         .respond_with(ResponseTemplate::new(400).set_body_json(&error_response))
-        .mount(&ctx.mock_server)
+        .mount(ctx.mock_server_mut().await)
         .await;
 
-    assert!(!ctx.anthropic_base_url().is_empty());
+    assert!(!ctx.anthropic_base_url().await.is_empty());
 }
 
 #[tokio::test]
 async fn test_anthropic_rate_limit_response() {
-    let ctx = E2ETestContext::new().await;
+    let mut ctx = E2ETestContext::new().await;
 
     let error_response = json!({
         "type": "error",
@@ -123,15 +122,15 @@ async fn test_anthropic_rate_limit_response() {
                 .append_header("retry-after", "60")
                 .set_body_json(&error_response),
         )
-        .mount(&ctx.mock_server)
+        .mount(ctx.mock_server_mut().await)
         .await;
 
-    assert!(!ctx.anthropic_base_url().is_empty());
+    assert!(!ctx.anthropic_base_url().await.is_empty());
 }
 
 #[tokio::test]
 async fn test_anthropic_auth_error() {
-    let ctx = E2ETestContext::new().await;
+    let mut ctx = E2ETestContext::new().await;
 
     let error_response = json!({
         "type": "error",
@@ -144,10 +143,10 @@ async fn test_anthropic_auth_error() {
     Mock::given(method("POST"))
         .and(path("/messages"))
         .respond_with(ResponseTemplate::new(401).set_body_json(&error_response))
-        .mount(&ctx.mock_server)
+        .mount(ctx.mock_server_mut().await)
         .await;
 
-    assert!(!ctx.anthropic_base_url().is_empty());
+    assert!(!ctx.anthropic_base_url().await.is_empty());
 }
 
 #[tokio::test]
@@ -221,8 +220,8 @@ async fn test_anthropic_response_missing_required_fields() {
 
 #[tokio::test]
 async fn test_anthropic_mock_server_is_available() {
-    let ctx = E2ETestContext::new().await;
-    let url = ctx.anthropic_base_url();
+    let mut ctx = E2ETestContext::new().await;
+    let url = ctx.anthropic_base_url().await;
 
     assert!(!url.is_empty(), "Mock server URL should not be empty");
     assert!(

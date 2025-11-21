@@ -17,7 +17,7 @@
 - 🚀 **Real-time Streaming** — See responses as they're generated
 - 📍 **Code Context** — Reference files, selections, and cursor position
 
-> **Status:** Early development. Chat interface coming Q2 2025. Foundation and provider integration complete.
+> **Status:** Early development. Chat interface coming Q2 2025. Foundation, provider integration, and HTTP layer complete.
 
 ---
 
@@ -105,7 +105,9 @@ This enables **pre-commit** and **pre-push** hooks that:
 | OpenAI integration | ✅ Complete |
 | Anthropic integration | ✅ Complete |
 | Configuration system | ✅ Complete |
-| HTTP & streaming | ✅ Complete |
+| HTTP client & retry | ✅ Complete |
+| Streaming responses | ✅ Complete |
+| E2E testing | ✅ Complete |
 | Chat interface | 📅 Q2 2025 |
 | Code completions | 📅 Q3 2025+ |
 
@@ -160,11 +162,11 @@ This enables **pre-commit** and **pre-push** hooks that:
 
 ## Roadmap
 
-**Current Phase:** Phase 2.3 — HTTP Integration ✅
+**Current Phase:** Phase 2.4 — E2E Testing ✅
 
 **Timeline:**
 - ✅ **Phase 1** — Foundation complete
-- ✅ **Phase 2** — Provider integration complete
+- ✅ **Phase 2** — Provider integration, HTTP & streaming complete
 - 📅 **Phase 3** — Chat interface (Q2 2025) 🎯 **Next milestone**
 - 📅 **Phase 4** — GitHub Copilot LSP & completions (Q3 2025+)
 
