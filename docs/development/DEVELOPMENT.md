@@ -23,8 +23,10 @@ Zed Copilot is a native Rust extension for Zed IDE built as a cdylib. The primar
 │  │ ZedCopilot (Extension)                   │   │
 │  ├── AI Provider Manager (Phase 2.1) ✅     │   │
 │  ├── Configuration Manager (Phase 2.2) ✅   │   │
-│  ├── HTTP Client (Phase 2.3) ⏳              │   │
-│  ├── Streaming Handler (Phase 2.3) ⏳        │   │
+│  ├── HTTP Client (Phase 2.3) ✅              │   │
+│  ├── Streaming Handler (Phase 2.3) ✅        │   │
+│  ├── Retry & Rate Limiting (Phase 2.3) ✅   │   │
+│  ├── E2E Test Infrastructure (Phase 2.4) ✅ │   │
 │  ├── Chat Engine (Phase 3) ⏳                 │   │
 │  ├── Chat UI Panel (Phase 3) ⏳               │   │
 │  ├── Message History (Phase 3) ⏳             │   │
@@ -53,21 +55,34 @@ zed-copilot/
 │   ├── lib.rs                  # Main extension + unit tests
 │   ├── providers/              # AI provider abstraction (Phase 2.1 ✅)
 │   │   ├── mod.rs
-│   │   ├── trait_def.rs        # AiProvider trait
-│   │   ├── openai.rs           # OpenAI implementation
-│   │   ├── anthropic.rs        # Anthropic implementation
+│   │   ├── trait_def.rs        # AiProvider trait with complete & complete_stream
+│   │   ├── openai.rs           # OpenAI implementation with streaming
+│   │   ├── anthropic.rs        # Anthropic implementation with streaming
 │   │   ├── factory.rs          # Provider factory
 │   │   └── error.rs            # Error types
-│   └── config/                 # Configuration system (Phase 2.2 ✅)
+│   ├── config/                 # Configuration system (Phase 2.2 ✅)
+│   │   ├── mod.rs
+│   │   ├── structs.rs          # Configuration data structures
+│   │   ├── loader.rs           # JSON and env var loading
+│   │   ├── validator.rs        # Configuration validation
+│   │   ├── manager.rs          # ConfigManager facade
+│   │   └── errors.rs           # Error types
+│   └── http/                   # HTTP integration (Phase 2.3 ✅)
 │       ├── mod.rs
-│       ├── structs.rs          # Configuration data structures
-│       ├── loader.rs           # JSON and env var loading
-│       ├── validator.rs        # Configuration validation
-│       ├── manager.rs          # ConfigManager facade
-│       └── errors.rs           # Error types
+│       ├── client.rs           # HttpClient with timeout & retry
+│       ├── retry.rs            # RetryPolicy with exponential backoff
+│       ├── rate_limiter.rs     # RateLimiter with token bucket
+│       ├── openai.rs           # OpenAiHttpClient with streaming
+│       └── anthropic.rs        # AnthropicHttpClient with streaming
 ├── tests/
-│   ├── common/mod.rs           # Test utilities
-│   └── integration_tests.rs    # Integration tests
+│   ├── common/
+│   │   ├── mod.rs              # Test utilities
+│   │   ├── e2e_helpers.rs      # Wiremock server setup
+│   │   └── lazy_mock_server.rs # Lazy mock server singleton
+│   ├── fixtures/mod.rs         # Test fixtures
+│   ├── integration_tests.rs    # Integration tests
+│   ├── openai_e2e.rs           # OpenAI E2E tests (16 tests)
+│   └── anthropic_e2e.rs        # Anthropic E2E tests (21 tests)
 ├── docs/
 │   ├── README.md               # User guide
 │   ├── SETUP.md                # Installation instructions
@@ -87,13 +102,14 @@ zed-copilot/
 
 ## Current Status
 
-**Current Phase:** Phase 2.3 ✅ Complete
+**Current Phase:** Phase 2.4 ✅ Complete
 
 **Completed Phases:**
 - ✅ Phase 1 — Foundation
 - ✅ Phase 2.1 — AI Provider Abstraction
 - ✅ Phase 2.2 — Configuration System
 - ✅ Phase 2.3 — HTTP Integration & Streaming
+- ✅ Phase 2.4 — E2E Testing with HTTP Mocking
 
 **Next Phase:** Phase 3 — Chat Interface (Q2 2025) 🎯
 
@@ -182,7 +198,7 @@ cargo test test_name       # Specific test
 cargo test -- --nocapture  # Show println! output
 ```
 
-**Current Coverage:** 63 tests, all passing ✅
+**Current Coverage:** 131 tests, all passing ✅
 
 See [TESTING.md](TESTING.md) for detailed testing guide.
 
@@ -190,10 +206,13 @@ See [TESTING.md](TESTING.md) for detailed testing guide.
 
 | Component | Tests | Coverage |
 |-----------|-------|----------|
-| Extension | 5 | ✅ Complete |
-| Providers | 31 | ✅ Complete |
-| Configuration | 27 | ✅ Complete |
-| **Total** | **63** | **All Passing** |
+| Extension | 6 | ✅ Complete |
+| Providers | 18 | ✅ Complete |
+| Configuration | 32 | ✅ Complete |
+| HTTP | 38 | ✅ Complete |
+| **Unit Tests** | **94** | **All Passing** |
+| E2E Tests | 37 | ✅ Complete |
+| **Total** | **131** | **All Passing** |
 
 ## Key Components
 
@@ -423,10 +442,10 @@ Follow principles from [zed-rules/AGENTS.md](https://github.com/zed-industries/z
 
 ---
 
-**Current Phase:** Phase 2.3 Complete ✅  
+**Current Phase:** Phase 2.4 Complete ✅  
 **Next Milestone:** Phase 3 — Chat Interface (Q2 2025) 🎯  
 **Contributing:** See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
-**Back to:** [Development](../README.md#quick-navigation)
+**Back to:** [Documentation Index](../README.md)

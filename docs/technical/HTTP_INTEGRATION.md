@@ -17,6 +17,7 @@ The HTTP integration layer in Phase 2.3 enables real API calls to AI providers (
 │  AiProvider Trait (providers/*)     │
 │  - OpenAiProvider                   │
 │  - AnthropicProvider                │
+│  - complete() & complete_stream()   │
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -24,6 +25,7 @@ The HTTP integration layer in Phase 2.3 enables real API calls to AI providers (
 │  HTTP Clients (http/*)              │
 │  - OpenAiHttpClient                 │
 │  - AnthropicHttpClient              │
+│  - Streaming support via futures    │
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -32,12 +34,13 @@ The HTTP integration layer in Phase 2.3 enables real API calls to AI providers (
 │  - Timeout handling                 │
 │  - Retry with exponential backoff   │
 │  - Error classification             │
+│  - Streaming responses              │
 └──────────────┬──────────────────────┘
                │
         ┌──────┴──────┬──────────────┐
         ▼             ▼              ▼
     RetryPolicy  RateLimiter   reqwest::Client
-```
+```</text>
 
 ### Key Components
 
@@ -165,7 +168,7 @@ Transient errors trigger automatic retry; others are returned immediately.
 
 ## Usage Examples
 
-### Basic Provider Usage
+### Basic Provider Usage (Non-Streaming)
 ```rust
 use zed_copilot::providers::openai::OpenAiProvider;
 use zed_copilot::providers::trait_def::AiProvider;
@@ -179,6 +182,30 @@ let provider = OpenAiProvider::new(
 // Call API (with automatic retry on transient errors)
 let response = provider.complete("What is Rust?").await?;
 println!("{}", response);
+```
+
+### Streaming Provider Usage
+```rust
+use zed_copilot::providers::openai::OpenAiProvider;
+use zed_copilot::providers::trait_def::AiProvider;
+use futures::StreamExt;
+
+// Create provider
+let provider = OpenAiProvider::new(
+    "sk-...".to_string(),
+    "gpt-4".to_string()
+)?;
+
+// Stream response tokens in real-time
+let mut stream = provider.complete_stream("What is Rust?").await?;
+
+while let Some(result) = stream.next().await {
+    match result {
+        Ok(token) => print!("{}", token),
+        Err(e) => eprintln!("Stream error: {}", e),
+    }
+}
+println!(); // Newline after stream completes
 ```
 
 ### Custom HTTP Client
@@ -234,11 +261,17 @@ if limiter.check_rate_limit("openai").await {
 
 ### Running Tests
 ```bash
-# All tests
+# All tests (94 unit tests + 37 E2E tests)
+cargo test
+
+# Only unit tests
 cargo test --lib
 
-# Only HTTP tests
+# Only HTTP unit tests
 cargo test --lib http::
+
+# Only E2E tests
+cargo test --test '*'
 
 # Specific test
 cargo test --lib http::retry::tests::test_backoff_exponential_growth
@@ -260,12 +293,61 @@ cargo test --lib http::retry::tests::test_backoff_exponential_growth
 - **Models Tested**: claude-3-sonnet, claude-3-opus
 - **Documentation**: https://docs.anthropic.com/en/api/messages
 
-## Future Enhancements
+## Streaming Support
 
-### Phase 2.3+ (Streaming)
-- Server-Sent Events (SSE) for streaming responses
-- Partial token delivery for real-time UX
-- `execute_stream_request()` method in HttpClient
+### Current Implementation ✅
+
+Both OpenAI and Anthropic providers support streaming responses via the `complete_stream()` method:
+
+```rust
+use zed_copilot::providers::openai::OpenAiProvider;
+use zed_copilot::providers::trait_def::AiProvider;
+use futures::StreamExt;
+
+// Create provider
+let provider = OpenAiProvider::new(
+    "sk-...".to_string(),
+    "gpt-4".to_string()
+)?;
+
+// Stream response tokens
+let mut stream = provider.complete_stream("What is Rust?").await?;
+
+while let Some(result) = stream.next().await {
+    match result {
+        Ok(token) => print!("{}", token),
+        Err(e) => eprintln!("Error: {}", e),
+    }
+}
+```
+
+**Features:**
+- Real-time token delivery via `futures::Stream`
+- Works with both OpenAI and Anthropic providers
+- Automatic error handling in stream
+- Compatible with async/await patterns
+
+**Implementation Details:**
+- OpenAI: Uses `create_stream()` from async-openai SDK
+- Anthropic: Uses `stream_chat()` from anthropic_rust SDK
+- Returns `Pin<Box<dyn Stream<Item = ProviderResult<String>> + Send>>`
+- Handles partial content, deltas, and stream termination
+
+### Configuration
+
+Streaming can be enabled/disabled via chat configuration:
+
+```json
+{
+  "chat": {
+    "streaming_enabled": true
+  }
+}
+```
+
+Default: `true` (streaming enabled)
+
+## Future Enhancements
 
 ### Phase 4+ (Additional Providers)
 - GitHub Copilot LSP integration

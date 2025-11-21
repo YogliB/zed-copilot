@@ -158,4 +158,4 @@ run_wasm_validation() {
 
 ---
 
-**Back to:** [Technical Documentation](../technical/README.md)
+**Back to:** [Documentation Index](../README.md)
