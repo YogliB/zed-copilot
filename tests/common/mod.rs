@@ -1,5 +1,11 @@
 use serde_json::json;
 
+mod lazy_mock_server;
+pub use lazy_mock_server::LazyMockServer;
+
+mod e2e_helpers;
+pub use e2e_helpers::E2ETestContext;
+
 pub struct TestContext {
     pub extension_name: String,
 }
