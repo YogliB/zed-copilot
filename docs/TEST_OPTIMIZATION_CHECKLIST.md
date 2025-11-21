@@ -285,6 +285,185 @@ cargo tree --test integration_tests
 5. **Network timeouts** — Even mocked calls might have delay
    - Solution: Use `no-delay` wiremock options, avoid retry backoff in tests
 
+## Parameterized Tests for Error Scenarios
+
+When multiple tests share identical setup and assertion patterns, parameterize them to reduce duplication and improve maintainability.
+
+### When to Parameterize
+
+**Parameterize when:**
+- 3+ tests have identical mock setup and assertion logic
+- Tests differ only in input data (HTTP status, response body, error type)
+- Scenarios cover related behavior (e.g., different error types)
+
+**Keep separate when:**
+- Tests have different setup or teardown logic
+- Assertions diverge significantly
+- Scenarios are unrelated or test different code paths
+
+### Example: Before Parameterization
+
+```rust
+#[tokio::test]
+async fn test_openai_auth_error() {
+    let ctx = E2ETestContext::new().await;
+    let error_response = json!({
+        "error": { "message": "Invalid API key", "type": "invalid_request_error" }
+    });
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(401).set_body_json(&error_response))
+        .mount(&ctx.mock_server)
+        .await;
+    assert!(!ctx.openai_base_url().is_empty());
+}
+
+#[tokio::test]
+async fn test_openai_rate_limit_error() {
+    let ctx = E2ETestContext::new().await;
+    let error_response = json!({
+        "error": { "message": "Rate limit exceeded", "type": "server_error" }
+    });
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(429).set_body_json(&error_response))
+        .mount(&ctx.mock_server)
+        .await;
+    assert!(!ctx.openai_base_url().is_empty());
+}
+
+#[tokio::test]
+async fn test_openai_malformed_request_error() {
+    let ctx = E2ETestContext::new().await;
+    let error_response = json!({
+        "error": { "message": "Missing required field", "type": "invalid_request_error" }
+    });
+    Mock::given(method("POST"))
+        .respond_with(ResponseTemplate::new(400).set_body_json(&error_response))
+        .mount(&ctx.mock_server)
+        .await;
+    assert!(!ctx.openai_base_url().is_empty());
+}
+```
+
+### Example: After Parameterization
+
+**Define scenario data:**
+
+```rust
+// tests/common/mod.rs
+pub struct MockErrorScenario {
+    pub name: &'static str,
+    pub status: u16,
+    pub body_fn: fn() -> serde_json::Value,
+    pub expected_error_type: &'static str,
+}
+
+pub fn get_openai_error_scenarios() -> Vec<MockErrorScenario> {
+    vec![
+        MockErrorScenario {
+            name: "invalid_api_key",
+            status: 401,
+            body_fn: || json!({
+                "error": {
+                    "message": "Incorrect API key provided",
+                    "type": "invalid_request_error",
+                    "code": "invalid_api_key"
+                }
+            }),
+            expected_error_type: "invalid_request_error",
+        },
+        MockErrorScenario {
+            name: "rate_limit_exceeded",
+            status: 429,
+            body_fn: || json!({
+                "error": {
+                    "message": "Rate limit exceeded",
+                    "type": "server_error",
+                    "code": "rate_limit_exceeded"
+                }
+            }),
+            expected_error_type: "server_error",
+        },
+        MockErrorScenario {
+            name: "malformed_request",
+            status: 400,
+            body_fn: || json!({
+                "error": {
+                    "message": "Invalid request: missing required field 'model'",
+                    "type": "invalid_request_error",
+                    "code": "missing_field"
+                }
+            }),
+            expected_error_type: "invalid_request_error",
+        },
+    ]
+}
+```
+
+**Use parameterized test:**
+
+```rust
+// tests/openai_e2e.rs
+use common::get_openai_error_scenarios;
+
+#[tokio::test]
+async fn test_openai_error_scenarios() {
+    let scenarios = get_openai_error_scenarios();
+    
+    for scenario in scenarios {
+        let ctx = E2ETestContext::new().await;
+        let body = (scenario.body_fn)();
+        
+        assert!(
+            body.get("error").is_some(),
+            "Scenario '{}' error response should have proper structure",
+            scenario.name
+        );
+        
+        assert_eq!(
+            body.get("error")
+                .and_then(|e| e.get("type"))
+                .and_then(|t| t.as_str()),
+            Some(scenario.expected_error_type),
+            "Scenario '{}' should have expected error type '{}'",
+            scenario.name,
+            scenario.expected_error_type
+        );
+        
+        Mock::given(method("POST"))
+            .respond_with(ResponseTemplate::new(scenario.status).set_body_json(&body))
+            .mount(&ctx.mock_server)
+            .await;
+        
+        assert!(
+            !ctx.openai_base_url().is_empty(),
+            "Mock server should be available for scenario '{}'",
+            scenario.name
+        );
+    }
+}
+```
+
+### Benefits
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Test count | 3 separate tests | 1 parameterized test |
+| Code duplication | ~40% repeated logic | DRY, single setup pattern |
+| Adding scenarios | Create new test function | Add row to scenario vec |
+| Debugging | Test output shows 3 passing tests | Test output shows 1 test covering 3 scenarios |
+| Maintenance | Update 3 places | Update scenario definition once |
+
+### Implementation Checklist
+
+When parameterizing error tests:
+- [ ] Identify 3+ tests with identical mock setup and assertions
+- [ ] Create scenario struct with all varying data
+- [ ] Extract assertions into parameterized loop
+- [ ] Ensure scenario names clearly describe each case
+- [ ] Verify all original scenarios are covered (no test loss)
+- [ ] Test names indicate parameterization (e.g., `test_*_scenarios`)
+- [ ] Document scenario meanings in code comments
+
 ## Checklist by Test Type
 
 ### Adding a Unit Test ✓

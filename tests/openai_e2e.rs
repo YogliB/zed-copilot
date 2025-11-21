@@ -5,6 +5,7 @@ use wiremock::matchers::{header, method, path};
 use wiremock::{Mock, ResponseTemplate};
 
 mod e2e_helpers;
+use common::get_openai_error_scenarios;
 use e2e_helpers::E2ETestContext;
 
 #[tokio::test]
@@ -80,77 +81,41 @@ async fn test_openai_streaming_response_format() {
 }
 
 #[tokio::test]
-async fn test_openai_error_response_format() {
-    let ctx = E2ETestContext::new().await;
+async fn test_openai_error_scenarios() {
+    let scenarios = get_openai_error_scenarios();
 
-    let error_response = json!({
-        "error": {
-            "message": "Invalid request: missing required field 'model'",
-            "type": "invalid_request_error",
-            "param": "model",
-            "code": "missing_field"
-        }
-    });
+    for scenario in scenarios {
+        let ctx = E2ETestContext::new().await;
 
-    assert!(
-        error_response.get("error").is_some(),
-        "Error response should have proper structure"
-    );
+        let body = (scenario.body_fn)();
+        assert!(
+            body.get("error").is_some(),
+            "Scenario '{}' error response should have proper structure",
+            scenario.name
+        );
 
-    Mock::given(method("POST"))
-        .and(path("/v1/chat/completions"))
-        .respond_with(ResponseTemplate::new(400).set_body_json(&error_response))
-        .mount(&ctx.mock_server)
-        .await;
+        assert_eq!(
+            body.get("error")
+                .and_then(|e| e.get("type"))
+                .and_then(|t| t.as_str()),
+            Some(scenario.expected_error_type),
+            "Scenario '{}' should have expected error type '{}'",
+            scenario.name,
+            scenario.expected_error_type
+        );
 
-    assert!(!ctx.openai_base_url().is_empty());
-}
+        Mock::given(method("POST"))
+            .and(path("/v1/chat/completions"))
+            .respond_with(ResponseTemplate::new(scenario.status).set_body_json(&body))
+            .mount(&ctx.mock_server)
+            .await;
 
-#[tokio::test]
-async fn test_openai_rate_limit_response() {
-    let ctx = E2ETestContext::new().await;
-
-    let error_response = json!({
-        "error": {
-            "message": "Rate limit exceeded",
-            "type": "server_error",
-            "code": "rate_limit_exceeded"
-        }
-    });
-
-    Mock::given(method("POST"))
-        .and(path("/v1/chat/completions"))
-        .respond_with(
-            ResponseTemplate::new(429)
-                .append_header("retry-after", "60")
-                .set_body_json(&error_response),
-        )
-        .mount(&ctx.mock_server)
-        .await;
-
-    assert!(!ctx.openai_base_url().is_empty());
-}
-
-#[tokio::test]
-async fn test_openai_auth_error() {
-    let ctx = E2ETestContext::new().await;
-
-    let error_response = json!({
-        "error": {
-            "message": "Incorrect API key provided",
-            "type": "invalid_request_error",
-            "param": null,
-            "code": "invalid_api_key"
-        }
-    });
-
-    Mock::given(method("POST"))
-        .and(path("/v1/chat/completions"))
-        .respond_with(ResponseTemplate::new(401).set_body_json(&error_response))
-        .mount(&ctx.mock_server)
-        .await;
-
-    assert!(!ctx.openai_base_url().is_empty());
+        assert!(
+            !ctx.openai_base_url().is_empty(),
+            "Mock server should be available for scenario '{}'",
+            scenario.name
+        );
+    }
 }
 
 #[tokio::test]
